@@ -5,13 +5,13 @@ export const scriptLanguages = Object.values(ScriptLang);
 
 export const createScriptSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200),
-  description: z.string().max(1000).optional(),
+  description: z.string().max(1000).optional().or(z.literal('')).transform(v => v || undefined),
   content: z.string().min(1, 'Script content is required'),
   language: z.nativeEnum(ScriptLang).default(ScriptLang.BASH),
   version: z.string().max(20).default('1.0'),
   isPublic: z.boolean().default(false),
   isFavorite: z.boolean().default(false),
-  categoryId: z.string().uuid().optional().nullable(),
+  categoryId: z.string().uuid().optional().nullable().or(z.literal('')).transform(v => v || null),
   tagIds: z.array(z.string().uuid()).optional().default([]),
   linkedNoteIds: z.array(z.string().uuid()).optional().default([]),
   linkedProcedureIds: z.array(z.string().uuid()).optional().default([]),

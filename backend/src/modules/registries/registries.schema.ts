@@ -3,14 +3,14 @@ import { RegistryType } from '@prisma/client';
 
 export const createRegistrySchema = z.object({
   name: z.string().min(1, 'Name is required').max(200),
-  description: z.string().max(1000).optional(),
+  description: z.string().max(1000).optional().or(z.literal('')).transform(v => v || undefined),
   keyPath: z.string().min(1, 'Registry key path is required'),
   valueName: z.string().min(1, 'Value name is required'),
   valueData: z.string(),
   valueType: z.nativeEnum(RegistryType).default(RegistryType.REG_SZ),
   isEnabled: z.boolean().default(true),
   isFavorite: z.boolean().default(false),
-  categoryId: z.string().uuid().optional().nullable(),
+  categoryId: z.string().uuid().optional().nullable().or(z.literal('')).transform(v => v || null),
   tagIds: z.array(z.string().uuid()).optional().default([]),
 });
 

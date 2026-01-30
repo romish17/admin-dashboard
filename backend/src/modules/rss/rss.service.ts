@@ -13,12 +13,12 @@ const parser = new Parser({
 
 export const createFeedSchema = z.object({
   title: z.string().min(1).max(200),
-  description: z.string().max(500).optional(),
+  description: z.string().max(500).optional().or(z.literal('')).transform(v => v || undefined),
   url: z.string().url(),
   refreshRate: z.number().int().min(300).max(86400).default(3600),
   isActive: z.boolean().default(true),
   showOnHome: z.boolean().default(true),
-  categoryId: z.string().uuid().optional().nullable(),
+  categoryId: z.string().uuid().optional().nullable().or(z.literal('')).transform(v => v || null),
 });
 
 export const updateFeedSchema = createFeedSchema.partial();

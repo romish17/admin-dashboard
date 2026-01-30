@@ -6,13 +6,13 @@ import { z } from 'zod';
 
 export const createZabbixSchema = z.object({
   name: z.string().min(1).max(200),
-  description: z.string().max(1000).optional(),
+  description: z.string().max(1000).optional().or(z.literal('')).transform(v => v || undefined),
   itemType: z.nativeEnum(ZabbixType).default(ZabbixType.ITEM),
   content: z.record(z.unknown()), // JSON content for flexibility
-  version: z.string().max(20).optional(),
-  zabbixId: z.string().optional().nullable(),
+  version: z.string().max(20).optional().or(z.literal('')).transform(v => v || undefined),
+  zabbixId: z.string().optional().nullable().or(z.literal('')).transform(v => v || null),
   isFavorite: z.boolean().default(false),
-  categoryId: z.string().uuid().optional().nullable(),
+  categoryId: z.string().uuid().optional().nullable().or(z.literal('')).transform(v => v || null),
   tagIds: z.array(z.string().uuid()).optional().default([]),
   linkedNoteIds: z.array(z.string().uuid()).optional().default([]),
 });
