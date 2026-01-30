@@ -130,11 +130,11 @@ class RegistriesService {
     regContent += `; Total entries: ${entries.length}\n\n`;
 
     // Group entries by key path
-    const groupedByPath = entries.reduce((acc, entry) => {
+    const groupedByPath = entries.reduce<Record<string, typeof entries>>((acc, entry) => {
       if (!acc[entry.keyPath]) acc[entry.keyPath] = [];
       acc[entry.keyPath].push(entry);
       return acc;
-    }, {} as Record<string, typeof entries>);
+    }, {});
 
     for (const [keyPath, pathEntries] of Object.entries(groupedByPath)) {
       regContent += `[${keyPath}]\n`;

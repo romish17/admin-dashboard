@@ -44,7 +44,7 @@ class CategoriesService {
 
     return categories.map((cat) => ({
       ...cat,
-      totalItems: Object.values(cat._count).reduce((a, b) => a + b, 0),
+      totalItems: Object.values(cat._count).reduce((a: number, b: number) => a + b, 0),
     }));
   }
 

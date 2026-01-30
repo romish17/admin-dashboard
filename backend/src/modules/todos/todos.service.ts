@@ -28,7 +28,7 @@ class TodosService {
         });
         return {
           ...project,
-          stats: stats.reduce((acc, s) => ({ ...acc, [s.status]: s._count }), {}),
+          stats: stats.reduce<Record<string, number>>((acc, s) => ({ ...acc, [s.status]: s._count }), {}),
         };
       })
     );

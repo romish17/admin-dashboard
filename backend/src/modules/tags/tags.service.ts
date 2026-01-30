@@ -41,7 +41,7 @@ class TagsService {
 
     return tags.map((tag) => ({
       ...tag,
-      usageCount: Object.values(tag._count).reduce((a, b) => a + b, 0),
+      usageCount: Object.values(tag._count).reduce((a: number, b: number) => a + b, 0),
     }));
   }
 
