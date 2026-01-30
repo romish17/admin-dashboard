@@ -6,7 +6,7 @@ import { z } from 'zod';
 export const createFavoriteSchema = z.object({
   title: z.string().min(1).max(100),
   description: z.string().max(500).optional().or(z.literal('')).transform(v => v || undefined),
-  icon: z.string().max(50).optional().or(z.literal('')).transform(v => v || undefined),
+  icon: z.string().max(500).optional().or(z.literal('')).transform(v => v || undefined),
   url: z.union([z.string().url(), z.literal('')]).optional().nullable().transform(v => v || null),
   targetType: z.nativeEnum(TargetType).optional().nullable(),
   targetId: z.string().uuid().optional().nullable().or(z.literal('')).transform(v => v || null),
