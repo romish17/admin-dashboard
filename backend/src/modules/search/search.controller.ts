@@ -12,7 +12,7 @@ router.get('/', validateQuery(searchQuerySchema),
   async (req: AuthenticatedRequest, res: Response, next) => {
     try {
       const result = await searchService.globalSearch(req.user!.userId, req.query as never);
-      res.json({ success: true, ...result });
+      res.json({ success: true, data: result });
     } catch (error) { next(error); }
   }
 );

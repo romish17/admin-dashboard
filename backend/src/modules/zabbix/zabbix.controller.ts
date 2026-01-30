@@ -13,7 +13,7 @@ router.get('/', authorize('zabbix', 'read'), validateQuery(zabbixQuerySchema),
     try {
       const pagination = parsePagination(req.query);
       const result = await zabbixService.findAll(req.user!.userId, req.query as never, pagination);
-      res.json({ success: true, ...result });
+      res.json({ success: true, data: result });
     } catch (error) { next(error); }
   }
 );

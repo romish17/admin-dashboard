@@ -29,7 +29,7 @@ router.get(
         req.query as unknown as ScriptQueryInput,
         pagination
       );
-      res.json({ success: true, ...result });
+      res.json({ success: true, data: result });
     } catch (error) {
       next(error);
     }

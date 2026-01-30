@@ -78,7 +78,7 @@ router.get('/items', authorize('rss', 'read'), validateQuery(itemQuerySchema),
     try {
       const pagination = parsePagination(req.query);
       const result = await rssService.findAllItems(req.user!.userId, req.query as never, pagination);
-      res.json({ success: true, ...result });
+      res.json({ success: true, data: result });
     } catch (error) { next(error); }
   }
 );
