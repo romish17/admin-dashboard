@@ -11,6 +11,7 @@ import { Login } from '@/pages/auth/Login';
 import { Register } from '@/pages/auth/Register';
 import { ScriptsList } from '@/pages/scripts/ScriptsList';
 import { ScriptDetail } from '@/pages/scripts/ScriptDetail';
+import { ScriptEdit } from '@/pages/scripts/ScriptEdit';
 import { NotesList } from '@/pages/notes/NotesList';
 import { TodosList } from '@/pages/todos/TodosList';
 import { RegistriesList } from '@/pages/registries/RegistriesList';
@@ -80,7 +81,9 @@ export default function App() {
 
         {/* Scripts */}
         <Route path="scripts" element={<ScriptsList />} />
+        <Route path="scripts/new" element={<ScriptEdit />} />
         <Route path="scripts/:id" element={<ScriptDetail />} />
+        <Route path="scripts/:id/edit" element={<ScriptEdit />} />
 
         {/* Notes */}
         <Route path="notes" element={<NotesList />} />

@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
-import { apiGet, apiPost, getErrorMessage } from '@/services/api';
+import { apiGet, apiPost, apiPut, getErrorMessage } from '@/services/api';
 import { Todo, Project, PaginatedResponse } from '@/types';
-import { PlusIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, CheckIcon, PencilIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import toast from 'react-hot-toast';
+import { Modal } from '@/components/ui/Modal';
+import { TodoForm } from '@/components/forms/TodoForm';
 
 const statusColors = {
   TODO: 'bg-dark-600',
@@ -24,6 +26,9 @@ export function TodosList() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState<string>('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -37,7 +42,7 @@ export function TodosList() {
 
       const [todosRes, projectsRes] = await Promise.all([
         apiGet<PaginatedResponse<Todo>>('/todos', params),
-        apiGet<Project[]>('/todos/projects'),
+        apiGet<Project[]>('/todos/projects').catch(() => []),
       ]);
       setTodos(todosRes.data);
       setProjects(projectsRes);
@@ -57,6 +62,44 @@ export function TodosList() {
     }
   }
 
+  function openModal(todo?: Todo) {
+    setEditingTodo(todo || null);
+    setIsModalOpen(true);
+  }
+
+  function closeModal() {
+    setIsModalOpen(false);
+    setEditingTodo(null);
+  }
+
+  async function handleSubmit(data: {
+    title: string;
+    description?: string;
+    status: Todo['status'];
+    priority: Todo['priority'];
+    dueDate?: string;
+    projectId?: string;
+    categoryId?: string;
+    tagIds: string[];
+  }) {
+    setIsSaving(true);
+    try {
+      if (editingTodo) {
+        await apiPut(`/todos/${editingTodo.id}`, data);
+        toast.success('Task updated successfully');
+      } else {
+        await apiPost('/todos', data);
+        toast.success('Task created successfully');
+      }
+      closeModal();
+      fetchData();
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -64,7 +107,7 @@ export function TodosList() {
           <h1 className="text-2xl font-bold text-dark-100">Todos</h1>
           <p className="text-dark-400">Manage your tasks and projects</p>
         </div>
-        <button className="btn-primary">
+        <button onClick={() => openModal()} className="btn-primary">
           <PlusIcon className="w-5 h-5 mr-2" />
           New Task
         </button>
@@ -126,7 +169,7 @@ export function TodosList() {
                 {todo.status === 'DONE' && <CheckIcon className="w-4 h-4 text-white" />}
               </button>
 
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 cursor-pointer" onClick={() => openModal(todo)}>
                 <h3 className={clsx(
                   'font-medium',
                   todo.status === 'DONE' ? 'text-dark-500 line-through' : 'text-dark-100'
@@ -151,11 +194,32 @@ export function TodosList() {
                   'w-2 h-2 rounded-full',
                   statusColors[todo.status]
                 )} />
+                <button
+                  onClick={() => openModal(todo)}
+                  className="p-1 hover:bg-dark-700 rounded"
+                >
+                  <PencilIcon className="w-4 h-4 text-dark-400" />
+                </button>
               </div>
             </div>
           ))}
         </div>
       )}
+
+      {/* Create/Edit Modal */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        title={editingTodo ? 'Edit Task' : 'New Task'}
+        size="lg"
+      >
+        <TodoForm
+          todo={editingTodo || undefined}
+          onSubmit={handleSubmit}
+          onCancel={closeModal}
+          isLoading={isSaving}
+        />
+      </Modal>
     </div>
   );
 }
