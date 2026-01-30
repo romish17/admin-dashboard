@@ -13,7 +13,7 @@ router.get('/', authorize('procedures', 'read'), validateQuery(procedureQuerySch
     try {
       const pagination = parsePagination(req.query);
       const result = await proceduresService.findAll(req.user!.userId, req.query as never, pagination);
-      res.json({ success: true, ...result });
+      res.json({ success: true, data: result });
     } catch (error) { next(error); }
   }
 );

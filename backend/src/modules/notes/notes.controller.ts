@@ -14,7 +14,7 @@ router.get('/', authorize('notes', 'read'), validateQuery(noteQuerySchema),
     try {
       const pagination = parsePagination(req.query);
       const result = await notesService.findAll(req.user!.userId, req.query as never, pagination);
-      res.json({ success: true, ...result });
+      res.json({ success: true, data: result });
     } catch (error) { next(error); }
   }
 );
