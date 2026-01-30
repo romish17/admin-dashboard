@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { apiGet, getErrorMessage } from '@/services/api';
-import { Procedure, ProcedureStep, Category, Tag } from '@/types';
+import { Procedure, Category, Tag } from '@/types';
 import { PlusIcon, TrashIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
