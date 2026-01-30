@@ -6,6 +6,25 @@ import toast from 'react-hot-toast';
 import { Modal } from '@/components/ui/Modal';
 import { FavoriteForm } from '@/components/forms/FavoriteForm';
 
+function FavoriteIcon({ icon }: { icon?: string | null }) {
+  if (!icon) return <span className="text-2xl">⭐</span>;
+
+  if (icon.startsWith('http')) {
+    return (
+      <img
+        src={icon}
+        alt=""
+        className="w-6 h-6 object-contain"
+        onError={(e) => {
+          (e.target as HTMLImageElement).style.display = 'none';
+        }}
+      />
+    );
+  }
+
+  return <span className="text-2xl">{icon}</span>;
+}
+
 export function FavoritesList() {
   const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -105,7 +124,7 @@ export function FavoritesList() {
           {favorites.map((fav) => (
             <div key={fav.id} className="card-hover group">
               <div className="flex items-start gap-3">
-                <span className="text-2xl">{fav.icon || '⭐'}</span>
+                <FavoriteIcon icon={fav.icon} />
                 <div className="flex-1 min-w-0">
                   {fav.url ? (
                     <a
