@@ -14,24 +14,29 @@ import {
   ClockIcon,
   ExclamationCircleIcon,
   ArrowTopRightOnSquareIcon,
+  FolderIcon,
+  RssIcon,
 } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import { formatDistanceToNow } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 const modules = [
   { name: 'Scripts', href: '/scripts', icon: CodeBracketIcon, color: 'bg-blue-500/20 text-blue-400' },
-  { name: 'Notes', href: '/notes', icon: DocumentTextIcon, color: 'bg-green-500/20 text-green-400' },
-  { name: 'Todos', href: '/todos', icon: ClipboardDocumentListIcon, color: 'bg-yellow-500/20 text-yellow-400' },
-  { name: 'Procedures', href: '/procedures', icon: BookOpenIcon, color: 'bg-purple-500/20 text-purple-400' },
-  { name: 'Registries', href: '/registries', icon: ComputerDesktopIcon, color: 'bg-orange-500/20 text-orange-400' },
+  { name: 'Notes', href: '/notes', icon: DocumentTextIcon, color: 'bg-emerald-500/20 text-emerald-400' },
+  { name: 'Tâches', href: '/todos', icon: ClipboardDocumentListIcon, color: 'bg-amber-500/20 text-amber-400' },
+  { name: 'Projets', href: '/projects', icon: FolderIcon, color: 'bg-violet-500/20 text-violet-400' },
+  { name: 'Procédures', href: '/procedures', icon: BookOpenIcon, color: 'bg-pink-500/20 text-pink-400' },
+  { name: 'Registres', href: '/registries', icon: ComputerDesktopIcon, color: 'bg-orange-500/20 text-orange-400' },
   { name: 'Zabbix', href: '/zabbix', icon: ServerIcon, color: 'bg-red-500/20 text-red-400' },
+  { name: 'Flux RSS', href: '/rss', icon: RssIcon, color: 'bg-cyan-500/20 text-cyan-400' },
 ];
 
 const priorityConfig = {
-  URGENT: { icon: ExclamationCircleIcon, color: 'text-red-400', bg: 'bg-red-500/20' },
-  HIGH: { icon: ExclamationCircleIcon, color: 'text-orange-400', bg: 'bg-orange-500/20' },
-  MEDIUM: { icon: ClockIcon, color: 'text-yellow-400', bg: 'bg-yellow-500/20' },
-  LOW: { icon: CheckCircleIcon, color: 'text-green-400', bg: 'bg-green-500/20' },
+  URGENT: { icon: ExclamationCircleIcon, color: 'text-red-400', bg: 'bg-red-500/20', label: 'Urgent' },
+  HIGH: { icon: ExclamationCircleIcon, color: 'text-orange-400', bg: 'bg-orange-500/20', label: 'Haute' },
+  MEDIUM: { icon: ClockIcon, color: 'text-yellow-400', bg: 'bg-yellow-500/20', label: 'Moyenne' },
+  LOW: { icon: CheckCircleIcon, color: 'text-green-400', bg: 'bg-green-500/20', label: 'Basse' },
 };
 
 export function Dashboard() {
@@ -44,9 +49,9 @@ export function Dashboard() {
     async function fetchDashboardData() {
       try {
         const [favoritesData, todosData, rssData] = await Promise.all([
-          apiGet<Favorite[]>('/favorites'),
-          apiGet<Todo[]>('/todos/dashboard'),
-          apiGet<RssItem[]>('/rss/items/dashboard'),
+          apiGet<Favorite[]>('/favorites').catch(() => []),
+          apiGet<Todo[]>('/todos/dashboard').catch(() => []),
+          apiGet<RssItem[]>('/rss/items/dashboard').catch(() => []),
         ]);
         setFavorites(favoritesData);
         setTodos(todosData);
@@ -70,29 +75,26 @@ export function Dashboard() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Welcome section */}
-      <div className="card">
-        <h1 className="text-2xl font-bold text-dark-100">Welcome to AdminDashboard</h1>
-        <p className="mt-1 text-dark-400">Your personal productivity cockpit. Quick access to all your tools.</p>
-      </div>
-
+    <div className="space-y-8">
       {/* Quick access modules */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {modules.map((module) => (
-          <Link
-            key={module.name}
-            to={module.href}
-            className="card-hover flex flex-col items-center justify-center py-6 text-center group"
-          >
-            <div className={clsx('w-12 h-12 rounded-xl flex items-center justify-center mb-3', module.color)}>
-              <module.icon className="w-6 h-6" />
-            </div>
-            <span className="text-sm font-medium text-dark-200 group-hover:text-dark-100">
-              {module.name}
-            </span>
-          </Link>
-        ))}
+      <div>
+        <h2 className="text-lg font-semibold text-dark-100 mb-4">Accès rapide</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+          {modules.map((module) => (
+            <Link
+              key={module.name}
+              to={module.href}
+              className="card-hover flex flex-col items-center justify-center py-6 text-center group"
+            >
+              <div className={clsx('w-12 h-12 rounded-xl flex items-center justify-center mb-3', module.color)}>
+                <module.icon className="w-6 h-6" />
+              </div>
+              <span className="text-sm font-medium text-dark-300 group-hover:text-dark-100">
+                {module.name}
+              </span>
+            </Link>
+          ))}
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -100,23 +102,23 @@ export function Dashboard() {
         <div className="card">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-dark-100 flex items-center gap-2">
-              <StarIcon className="w-5 h-5 text-yellow-400" />
-              Favorites
+              <StarIcon className="w-5 h-5 text-amber-400" />
+              Favoris
             </h2>
             <Link to="/favorites" className="text-sm text-primary-400 hover:text-primary-300">
-              View all
+              Voir tout
             </Link>
           </div>
 
           {favorites.length === 0 ? (
-            <p className="text-dark-400 text-sm">No favorites yet. Add some from other modules!</p>
+            <p className="text-dark-400 text-sm">Aucun favori. Ajoutez-en depuis les autres modules !</p>
           ) : (
             <div className="space-y-2">
               {favorites.slice(0, 8).map((favorite) => (
                 <a
                   key={favorite.id}
                   href={favorite.url || `/${favorite.targetType?.toLowerCase()}s/${favorite.targetId}`}
-                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-dark-700 transition-colors"
+                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-dark-700/50 transition-colors"
                   target={favorite.url ? '_blank' : undefined}
                   rel={favorite.url ? 'noopener noreferrer' : undefined}
                 >
@@ -136,15 +138,15 @@ export function Dashboard() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-dark-100 flex items-center gap-2">
               <ClipboardDocumentListIcon className="w-5 h-5 text-primary-400" />
-              Priority Tasks
+              Tâches prioritaires
             </h2>
             <Link to="/todos" className="text-sm text-primary-400 hover:text-primary-300">
-              View all
+              Voir tout
             </Link>
           </div>
 
           {todos.length === 0 ? (
-            <p className="text-dark-400 text-sm">No priority tasks. All caught up!</p>
+            <p className="text-dark-400 text-sm">Aucune tâche prioritaire. Tout est à jour !</p>
           ) : (
             <div className="space-y-2">
               {todos.slice(0, 6).map((todo) => {
@@ -152,9 +154,9 @@ export function Dashboard() {
                 return (
                   <div
                     key={todo.id}
-                    className="flex items-start gap-3 p-2 rounded-lg hover:bg-dark-700 transition-colors"
+                    className="flex items-start gap-3 p-2 rounded-lg hover:bg-dark-700/50 transition-colors"
                   >
-                    <div className={clsx('p-1 rounded', config.bg)}>
+                    <div className={clsx('p-1.5 rounded-lg', config.bg)}>
                       <config.icon className={clsx('w-4 h-4', config.color)} />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -174,18 +176,16 @@ export function Dashboard() {
         <div className="card">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-dark-100 flex items-center gap-2">
-              <svg className="w-5 h-5 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z" />
-              </svg>
-              Latest News
+              <RssIcon className="w-5 h-5 text-orange-400" />
+              Dernières actualités
             </h2>
             <Link to="/rss" className="text-sm text-primary-400 hover:text-primary-300">
-              View all
+              Voir tout
             </Link>
           </div>
 
           {rssItems.length === 0 ? (
-            <p className="text-dark-400 text-sm">No RSS feeds configured. Add some in Settings!</p>
+            <p className="text-dark-400 text-sm">Aucun flux RSS configuré. Ajoutez-en dans les paramètres !</p>
           ) : (
             <div className="space-y-3">
               {rssItems.slice(0, 5).map((item) => (
@@ -194,7 +194,7 @@ export function Dashboard() {
                   href={item.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block p-2 rounded-lg hover:bg-dark-700 transition-colors"
+                  className="block p-2 rounded-lg hover:bg-dark-700/50 transition-colors"
                 >
                   <p className="text-sm text-dark-200 line-clamp-2">{item.title}</p>
                   <div className="flex items-center gap-2 mt-1">
@@ -203,7 +203,7 @@ export function Dashboard() {
                       <>
                         <span className="text-dark-600">•</span>
                         <span className="text-xs text-dark-500">
-                          {formatDistanceToNow(new Date(item.publishedAt), { addSuffix: true })}
+                          {formatDistanceToNow(new Date(item.publishedAt), { addSuffix: true, locale: fr })}
                         </span>
                       </>
                     )}

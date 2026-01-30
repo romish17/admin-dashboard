@@ -17,24 +17,20 @@ import {
   MagnifyingGlassIcon,
   ComputerDesktopIcon,
   CpuChipIcon,
+  FolderIcon,
 } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 
-const mainNavigation = [
+const navigation = [
   { name: 'Tableau de bord', href: '/', icon: Squares2X2Icon },
-];
-
-const modulesNavigation = [
-  { name: 'Scripts & Reg', href: '/scripts', icon: CodeBracketIcon },
-  { name: 'Zabbix & Monitoring', href: '/zabbix', icon: ServerIcon },
-  { name: 'Tâches & Projets', href: '/todos', icon: ClipboardDocumentListIcon },
-  { name: 'Procédures & Notes', href: '/procedures', icon: BookOpenIcon },
-  { name: 'RSS Feeds', href: '/rss', icon: RssIcon },
-];
-
-const secondaryNavigation = [
+  { name: 'Scripts', href: '/scripts', icon: CodeBracketIcon },
   { name: 'Notes', href: '/notes', icon: DocumentTextIcon },
-  { name: 'Registries', href: '/registries', icon: ComputerDesktopIcon },
+  { name: 'Tâches', href: '/todos', icon: ClipboardDocumentListIcon },
+  { name: 'Projets', href: '/projects', icon: FolderIcon },
+  { name: 'Procédures', href: '/procedures', icon: BookOpenIcon },
+  { name: 'Registres', href: '/registries', icon: ComputerDesktopIcon },
+  { name: 'Zabbix', href: '/zabbix', icon: ServerIcon },
+  { name: 'Flux RSS', href: '/rss', icon: RssIcon },
   { name: 'Favoris', href: '/favorites', icon: StarIcon },
 ];
 
@@ -55,19 +51,6 @@ export function DashboardLayout() {
     logout();
     navigate('/login');
   };
-
-  const NavItem = ({ item, onClick }: { item: typeof mainNavigation[0]; onClick?: () => void }) => (
-    <NavLink
-      to={item.href}
-      className={({ isActive }) =>
-        isActive ? 'sidebar-link-active' : 'sidebar-link'
-      }
-      onClick={onClick}
-    >
-      <item.icon className="w-5 h-5" />
-      <span>{item.name}</span>
-    </NavLink>
-  );
 
   return (
     <div className="min-h-screen bg-dark-900">
@@ -106,36 +89,20 @@ export function DashboardLayout() {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-6 overflow-y-auto">
-            {/* Principal */}
-            <div>
-              <p className="section-label">Principal</p>
-              <div className="mt-2 space-y-1">
-                {mainNavigation.map((item) => (
-                  <NavItem key={item.name} item={item} onClick={() => setSidebarOpen(false)} />
-                ))}
-              </div>
-            </div>
-
-            {/* Modules */}
-            <div>
-              <p className="section-label">Modules</p>
-              <div className="mt-2 space-y-1">
-                {modulesNavigation.map((item) => (
-                  <NavItem key={item.name} item={item} onClick={() => setSidebarOpen(false)} />
-                ))}
-              </div>
-            </div>
-
-            {/* Other */}
-            <div>
-              <p className="section-label">Autres</p>
-              <div className="mt-2 space-y-1">
-                {secondaryNavigation.map((item) => (
-                  <NavItem key={item.name} item={item} onClick={() => setSidebarOpen(false)} />
-                ))}
-              </div>
-            </div>
+          <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+            {navigation.map((item) => (
+              <NavLink
+                key={item.name}
+                to={item.href}
+                className={({ isActive }) =>
+                  isActive ? 'sidebar-link-active' : 'sidebar-link'
+                }
+                onClick={() => setSidebarOpen(false)}
+              >
+                <item.icon className="w-5 h-5" />
+                <span>{item.name}</span>
+              </NavLink>
+            ))}
           </nav>
 
           {/* Settings & User */}
@@ -185,7 +152,7 @@ export function DashboardLayout() {
                 <p className="text-sm font-medium text-dark-100">
                   {user?.firstName || user?.username || 'Admin Sys'}
                 </p>
-                <p className="text-xs text-primary-400">Online</p>
+                <p className="text-xs text-primary-400">En ligne</p>
               </div>
               <div className="relative">
                 <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center ring-2 ring-primary-400/30">
