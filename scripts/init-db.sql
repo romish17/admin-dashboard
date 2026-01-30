@@ -6,7 +6,12 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 
 -- Create full-text search configuration for French and English
-CREATE TEXT SEARCH CONFIGURATION IF NOT EXISTS french_english (COPY = french);
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_ts_config WHERE cfgname = 'french_english') THEN
+    CREATE TEXT SEARCH CONFIGURATION french_english (COPY = french);
+  END IF;
+END $$;
 
 -- Grant permissions (if needed for additional users)
 -- GRANT ALL PRIVILEGES ON DATABASE admindash TO admindash;
