@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/auth';
 import {
@@ -18,6 +18,8 @@ import {
   ComputerDesktopIcon,
   CpuChipIcon,
   FolderIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 
@@ -36,9 +38,16 @@ const navigation = [
 
 export function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    return localStorage.getItem('sidebarCollapsed') === 'true';
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
+
+  useEffect(() => {
+    localStorage.setItem('sidebarCollapsed', String(sidebarCollapsed));
+  }, [sidebarCollapsed]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,20 +74,27 @@ export function DashboardLayout() {
       {/* Sidebar */}
       <aside
         className={clsx(
-          'fixed inset-y-0 left-0 z-50 w-72 bg-dark-900 border-r border-dark-800 transform transition-transform lg:translate-x-0',
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          'fixed inset-y-0 left-0 z-50 bg-dark-900 border-r border-dark-800 transform transition-all duration-300 lg:translate-x-0',
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full',
+          sidebarCollapsed ? 'lg:w-20' : 'lg:w-72',
+          'w-72'
         )}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-between h-16 px-6">
+          <div className={clsx(
+            'flex items-center h-16',
+            sidebarCollapsed ? 'justify-center px-2' : 'justify-between px-6'
+          )}>
             <NavLink to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-600/25">
+              <div className="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-600/25 flex-shrink-0">
                 <CpuChipIcon className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xl font-bold text-dark-50">
-                <span className="text-primary-400">NEXUS</span>HUB
-              </span>
+              {!sidebarCollapsed && (
+                <span className="text-xl font-bold text-dark-50">
+                  <span className="text-primary-400">NEXUS</span>HUB
+                </span>
+              )}
             </NavLink>
             <button
               className="lg:hidden p-2 rounded-xl hover:bg-dark-800"
@@ -89,39 +105,71 @@ export function DashboardLayout() {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+          <nav className={clsx(
+            'flex-1 py-6 space-y-1 overflow-y-auto',
+            sidebarCollapsed ? 'px-2' : 'px-4'
+          )}>
             {navigation.map((item) => (
               <NavLink
                 key={item.name}
                 to={item.href}
-                className={({ isActive }) =>
-                  isActive ? 'sidebar-link-active' : 'sidebar-link'
-                }
+                className={({ isActive }) => clsx(
+                  isActive ? 'sidebar-link-active' : 'sidebar-link',
+                  sidebarCollapsed && 'justify-center px-0'
+                )}
                 onClick={() => setSidebarOpen(false)}
+                title={sidebarCollapsed ? item.name : undefined}
               >
-                <item.icon className="w-5 h-5" />
-                <span>{item.name}</span>
+                <item.icon className="w-5 h-5 flex-shrink-0" />
+                {!sidebarCollapsed && <span>{item.name}</span>}
               </NavLink>
             ))}
           </nav>
 
-          {/* Settings & User */}
-          <div className="p-4 border-t border-dark-800">
+          {/* Settings & Collapse button */}
+          <div className={clsx(
+            'p-4 border-t border-dark-800 space-y-2',
+            sidebarCollapsed && 'px-2'
+          )}>
             <NavLink
               to="/settings"
-              className={({ isActive }) =>
-                isActive ? 'sidebar-link-active' : 'sidebar-link'
-              }
+              className={({ isActive }) => clsx(
+                isActive ? 'sidebar-link-active' : 'sidebar-link',
+                sidebarCollapsed && 'justify-center px-0'
+              )}
+              title={sidebarCollapsed ? 'Paramètres' : undefined}
             >
-              <Cog6ToothIcon className="w-5 h-5" />
-              <span>Paramètres</span>
+              <Cog6ToothIcon className="w-5 h-5 flex-shrink-0" />
+              {!sidebarCollapsed && <span>Paramètres</span>}
             </NavLink>
+
+            {/* Collapse toggle - desktop only */}
+            <button
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className={clsx(
+                'hidden lg:flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-dark-400 hover:text-dark-100 hover:bg-dark-800 transition-colors',
+                sidebarCollapsed && 'justify-center px-0'
+              )}
+              title={sidebarCollapsed ? 'Agrandir le menu' : 'Réduire le menu'}
+            >
+              {sidebarCollapsed ? (
+                <ChevronRightIcon className="w-5 h-5" />
+              ) : (
+                <>
+                  <ChevronLeftIcon className="w-5 h-5" />
+                  <span>Réduire</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
       </aside>
 
       {/* Main content */}
-      <div className="lg:pl-72">
+      <div className={clsx(
+        'transition-all duration-300',
+        sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-72'
+      )}>
         {/* Top bar */}
         <header className="sticky top-0 z-30 h-16 bg-dark-900/95 backdrop-blur-md border-b border-dark-800">
           <div className="flex items-center justify-between h-full px-4 lg:px-6">
