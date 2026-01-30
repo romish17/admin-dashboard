@@ -45,6 +45,9 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
+# Install OpenSSL for Prisma
+RUN apk add --no-cache openssl libc6-compat
+
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 appuser
@@ -57,8 +60,10 @@ COPY --from=deps /app/prisma ./prisma
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package.json ./
 
-# Create logs directory
+# Create logs directory and fix permissions for prisma
 RUN mkdir -p logs && chown -R appuser:nodejs logs
+RUN chown -R appuser:nodejs node_modules/.prisma
+RUN chown -R appuser:nodejs node_modules/@prisma
 
 # Switch to non-root user
 USER appuser
