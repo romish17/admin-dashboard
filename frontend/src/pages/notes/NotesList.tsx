@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
 import { apiGet, apiPost, getErrorMessage } from '@/services/api';
 import { Note, PaginatedResponse } from '@/types';
-import { PlusIcon, MagnifyingGlassIcon, StarIcon, PinIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, MagnifyingGlassIcon, StarIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 import ReactMarkdown from 'react-markdown';
-import clsx from 'clsx';
 import toast from 'react-hot-toast';
 import { formatDistanceToNow } from 'date-fns';
 
