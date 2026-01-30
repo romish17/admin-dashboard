@@ -1,0 +1,623 @@
+// AdminDashboard - Prisma Schema
+// PostgreSQL Database Schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// AUTHENTICATION & USERS
+// ============================================
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  firstName String?  @map("first_name")
+  lastName  String?  @map("last_name")
+  avatar    String?
+  role      Role     @default(USER)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  scripts         Script[]
+  registryEntries RegistryEntry[]
+  zabbixItems     ZabbixItem[]
+  notes           Note[]
+  procedures      Procedure[]
+  todos           Todo[]
+  projects        Project[]
+  favorites       Favorite[]
+  rssFeeds        RssFeed[]
+  categories      Category[]
+  tags            Tag[]
+  refreshTokens   RefreshToken[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+enum Role {
+  ADMIN
+  USER
+  READONLY
+}
+
+// ============================================
+// SHARED MODELS (Categories & Tags)
+// ============================================
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String
+  description String?
+  color       String   @default("#3B82F6")
+  icon        String?
+  userId      String   @map("user_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Relations
+  scripts         Script[]
+  registryEntries RegistryEntry[]
+  zabbixItems     ZabbixItem[]
+  notes           Note[]
+  procedures      Procedure[]
+  todos           Todo[]
+  rssFeeds        RssFeed[]
+
+  @@unique([userId, slug])
+  @@map("categories")
+}
+
+model Tag {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String
+  color     String   @default("#6B7280")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Relations
+  scripts         ScriptTag[]
+  registryEntries RegistryEntryTag[]
+  zabbixItems     ZabbixItemTag[]
+  notes           NoteTag[]
+  procedures      ProcedureTag[]
+  todos           TodoTag[]
+
+  @@unique([userId, slug])
+  @@map("tags")
+}
+
+// ============================================
+// MODULE: SCRIPTS
+// ============================================
+
+model Script {
+  id          String       @id @default(uuid())
+  title       String
+  description String?
+  content     String       @db.Text
+  language    ScriptLang   @default(BASH)
+  version     String       @default("1.0")
+  isPublic    Boolean      @default(false) @map("is_public")
+  isFavorite  Boolean      @default(false) @map("is_favorite")
+  userId      String       @map("user_id")
+  categoryId  String?      @map("category_id")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  // Full-text search vector
+  searchVector Unsupported("tsvector")? @map("search_vector")
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tags     ScriptTag[]
+
+  // Linked items
+  linkedNotes      ScriptNote[]
+  linkedProcedures ScriptProcedure[]
+
+  @@index([userId])
+  @@index([categoryId])
+  @@map("scripts")
+}
+
+model ScriptTag {
+  scriptId String @map("script_id")
+  tagId    String @map("tag_id")
+
+  script Script @relation(fields: [scriptId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([scriptId, tagId])
+  @@map("script_tags")
+}
+
+model ScriptNote {
+  scriptId String @map("script_id")
+  noteId   String @map("note_id")
+
+  script Script @relation(fields: [scriptId], references: [id], onDelete: Cascade)
+  note   Note   @relation(fields: [noteId], references: [id], onDelete: Cascade)
+
+  @@id([scriptId, noteId])
+  @@map("script_notes")
+}
+
+model ScriptProcedure {
+  scriptId    String @map("script_id")
+  procedureId String @map("procedure_id")
+
+  script    Script    @relation(fields: [scriptId], references: [id], onDelete: Cascade)
+  procedure Procedure @relation(fields: [procedureId], references: [id], onDelete: Cascade)
+
+  @@id([scriptId, procedureId])
+  @@map("script_procedures")
+}
+
+enum ScriptLang {
+  BASH
+  POWERSHELL
+  PYTHON
+  JAVASCRIPT
+  SQL
+  OTHER
+}
+
+// ============================================
+// MODULE: WINDOWS REGISTRY
+// ============================================
+
+model RegistryEntry {
+  id          String       @id @default(uuid())
+  name        String
+  description String?
+  keyPath     String       @map("key_path")
+  valueName   String       @map("value_name")
+  valueData   String       @map("value_data") @db.Text
+  valueType   RegistryType @map("value_type")
+  isEnabled   Boolean      @default(true) @map("is_enabled")
+  isFavorite  Boolean      @default(false) @map("is_favorite")
+  userId      String       @map("user_id")
+  categoryId  String?      @map("category_id")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  // Full-text search vector
+  searchVector Unsupported("tsvector")? @map("search_vector")
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tags     RegistryEntryTag[]
+
+  // Linked items
+  linkedProcedures RegistryProcedure[]
+
+  @@index([userId])
+  @@index([categoryId])
+  @@map("registry_entries")
+}
+
+model RegistryEntryTag {
+  registryEntryId String @map("registry_entry_id")
+  tagId           String @map("tag_id")
+
+  registryEntry RegistryEntry @relation(fields: [registryEntryId], references: [id], onDelete: Cascade)
+  tag           Tag           @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([registryEntryId, tagId])
+  @@map("registry_entry_tags")
+}
+
+model RegistryProcedure {
+  registryEntryId String @map("registry_entry_id")
+  procedureId     String @map("procedure_id")
+
+  registryEntry RegistryEntry @relation(fields: [registryEntryId], references: [id], onDelete: Cascade)
+  procedure     Procedure     @relation(fields: [procedureId], references: [id], onDelete: Cascade)
+
+  @@id([registryEntryId, procedureId])
+  @@map("registry_procedures")
+}
+
+enum RegistryType {
+  REG_SZ
+  REG_EXPAND_SZ
+  REG_MULTI_SZ
+  REG_DWORD
+  REG_QWORD
+  REG_BINARY
+  REG_NONE
+}
+
+// ============================================
+// MODULE: ZABBIX
+// ============================================
+
+model ZabbixItem {
+  id          String        @id @default(uuid())
+  name        String
+  description String?
+  itemType    ZabbixType    @map("item_type")
+  content     Json          // Flexible JSON for different Zabbix item types
+  version     String?
+  zabbixId    String?       @map("zabbix_id") // External Zabbix ID for sync
+  isFavorite  Boolean       @default(false) @map("is_favorite")
+  userId      String        @map("user_id")
+  categoryId  String?       @map("category_id")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  // Full-text search vector
+  searchVector Unsupported("tsvector")? @map("search_vector")
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tags     ZabbixItemTag[]
+  notes    ZabbixNote[]
+
+  @@index([userId])
+  @@index([categoryId])
+  @@map("zabbix_items")
+}
+
+model ZabbixItemTag {
+  zabbixItemId String @map("zabbix_item_id")
+  tagId        String @map("tag_id")
+
+  zabbixItem ZabbixItem @relation(fields: [zabbixItemId], references: [id], onDelete: Cascade)
+  tag        Tag        @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([zabbixItemId, tagId])
+  @@map("zabbix_item_tags")
+}
+
+model ZabbixNote {
+  zabbixItemId String @map("zabbix_item_id")
+  noteId       String @map("note_id")
+
+  zabbixItem ZabbixItem @relation(fields: [zabbixItemId], references: [id], onDelete: Cascade)
+  note       Note       @relation(fields: [noteId], references: [id], onDelete: Cascade)
+
+  @@id([zabbixItemId, noteId])
+  @@map("zabbix_notes")
+}
+
+enum ZabbixType {
+  ITEM
+  TRIGGER
+  TEMPLATE
+  HOST
+  HOSTGROUP
+  ACTION
+  MACRO
+  OTHER
+}
+
+// ============================================
+// MODULE: NOTES
+// ============================================
+
+model Note {
+  id         String   @id @default(uuid())
+  title      String
+  content    String   @db.Text
+  isMarkdown Boolean  @default(true) @map("is_markdown")
+  isPinned   Boolean  @default(false) @map("is_pinned")
+  isFavorite Boolean  @default(false) @map("is_favorite")
+  userId     String   @map("user_id")
+  categoryId String?  @map("category_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  // Full-text search vector
+  searchVector Unsupported("tsvector")? @map("search_vector")
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tags     NoteTag[]
+
+  // Linked items
+  linkedScripts    ScriptNote[]
+  linkedZabbix     ZabbixNote[]
+  linkedProcedures NoteProcedure[]
+
+  @@index([userId])
+  @@index([categoryId])
+  @@map("notes")
+}
+
+model NoteTag {
+  noteId String @map("note_id")
+  tagId  String @map("tag_id")
+
+  note Note @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([noteId, tagId])
+  @@map("note_tags")
+}
+
+model NoteProcedure {
+  noteId      String @map("note_id")
+  procedureId String @map("procedure_id")
+
+  note      Note      @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  procedure Procedure @relation(fields: [procedureId], references: [id], onDelete: Cascade)
+
+  @@id([noteId, procedureId])
+  @@map("note_procedures")
+}
+
+// ============================================
+// MODULE: PROCEDURES
+// ============================================
+
+model Procedure {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  version     String   @default("1.0")
+  isPinned    Boolean  @default(false) @map("is_pinned")
+  isFavorite  Boolean  @default(false) @map("is_favorite")
+  userId      String   @map("user_id")
+  categoryId  String?  @map("category_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Full-text search vector
+  searchVector Unsupported("tsvector")? @map("search_vector")
+
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tags     ProcedureTag[]
+  steps    ProcedureStep[]
+
+  // Linked items
+  linkedScripts    ScriptProcedure[]
+  linkedRegistries RegistryProcedure[]
+  linkedNotes      NoteProcedure[]
+
+  @@index([userId])
+  @@index([categoryId])
+  @@map("procedures")
+}
+
+model ProcedureStep {
+  id          String  @id @default(uuid())
+  stepNumber  Int     @map("step_number")
+  title       String
+  content     String  @db.Text
+  isOptional  Boolean @default(false) @map("is_optional")
+  procedureId String  @map("procedure_id")
+
+  procedure Procedure @relation(fields: [procedureId], references: [id], onDelete: Cascade)
+
+  @@unique([procedureId, stepNumber])
+  @@map("procedure_steps")
+}
+
+model ProcedureTag {
+  procedureId String @map("procedure_id")
+  tagId       String @map("tag_id")
+
+  procedure Procedure @relation(fields: [procedureId], references: [id], onDelete: Cascade)
+  tag       Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([procedureId, tagId])
+  @@map("procedure_tags")
+}
+
+// ============================================
+// MODULE: TODOS & PROJECTS
+// ============================================
+
+model Project {
+  id          String        @id @default(uuid())
+  name        String
+  description String?
+  color       String        @default("#3B82F6")
+  status      ProjectStatus @default(ACTIVE)
+  userId      String        @map("user_id")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  todos Todo[]
+
+  @@index([userId])
+  @@map("projects")
+}
+
+model Todo {
+  id          String       @id @default(uuid())
+  title       String
+  description String?
+  status      TodoStatus   @default(TODO)
+  priority    TodoPriority @default(MEDIUM)
+  dueDate     DateTime?    @map("due_date")
+  isPinned    Boolean      @default(false) @map("is_pinned")
+  isFavorite  Boolean      @default(false) @map("is_favorite")
+  completedAt DateTime?    @map("completed_at")
+  userId      String       @map("user_id")
+  projectId   String?      @map("project_id")
+  categoryId  String?      @map("category_id")
+  parentId    String?      @map("parent_id")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project  Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  parent   Todo?     @relation("TodoSubtasks", fields: [parentId], references: [id], onDelete: Cascade)
+  subtasks Todo[]    @relation("TodoSubtasks")
+  tags     TodoTag[]
+
+  @@index([userId])
+  @@index([projectId])
+  @@index([categoryId])
+  @@map("todos")
+}
+
+model TodoTag {
+  todoId String @map("todo_id")
+  tagId  String @map("tag_id")
+
+  todo Todo @relation(fields: [todoId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([todoId, tagId])
+  @@map("todo_tags")
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ARCHIVED
+  COMPLETED
+}
+
+enum TodoStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+  CANCELLED
+}
+
+enum TodoPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+// ============================================
+// MODULE: FAVORITES
+// ============================================
+
+model Favorite {
+  id          String       @id @default(uuid())
+  title       String
+  description String?
+  icon        String?
+  url         String?      // For external links
+  targetType  TargetType?  @map("target_type")
+  targetId    String?      @map("target_id") // For internal links
+  position    Int          @default(0)
+  userId      String       @map("user_id")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("favorites")
+}
+
+enum TargetType {
+  SCRIPT
+  REGISTRY
+  ZABBIX
+  NOTE
+  PROCEDURE
+  TODO
+  PROJECT
+  RSS_FEED
+  MODULE
+}
+
+// ============================================
+// MODULE: RSS FEEDS
+// ============================================
+
+model RssFeed {
+  id            String   @id @default(uuid())
+  title         String
+  description   String?
+  url           String
+  siteUrl       String?  @map("site_url")
+  icon          String?
+  refreshRate   Int      @default(3600) @map("refresh_rate") // In seconds
+  isActive      Boolean  @default(true) @map("is_active")
+  showOnHome    Boolean  @default(true) @map("show_on_home")
+  lastFetchedAt DateTime? @map("last_fetched_at")
+  userId        String   @map("user_id")
+  categoryId    String?  @map("category_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  items    RssItem[]
+
+  @@unique([userId, url])
+  @@index([userId])
+  @@map("rss_feeds")
+}
+
+model RssItem {
+  id          String    @id @default(uuid())
+  title       String
+  description String?   @db.Text
+  content     String?   @db.Text
+  url         String
+  author      String?
+  imageUrl    String?   @map("image_url")
+  isRead      Boolean   @default(false) @map("is_read")
+  isStarred   Boolean   @default(false) @map("is_starred")
+  publishedAt DateTime? @map("published_at")
+  feedId      String    @map("feed_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  feed RssFeed @relation(fields: [feedId], references: [id], onDelete: Cascade)
+
+  @@unique([feedId, url])
+  @@index([feedId])
+  @@map("rss_items")
+}
+
+// ============================================
+// AUDIT LOG (Optional - for tracking changes)
+// ============================================
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  action     String
+  entityType String   @map("entity_type")
+  entityId   String   @map("entity_id")
+  userId     String   @map("user_id")
+  oldData    Json?    @map("old_data")
+  newData    Json?    @map("new_data")
+  ipAddress  String?  @map("ip_address")
+  userAgent  String?  @map("user_agent")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@map("audit_logs")
+}
