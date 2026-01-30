@@ -75,5 +75,5 @@ EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:4000/health || exit 1
 
-# Start command with migrations
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/index.js"]
+# Start command with database sync
+CMD ["sh", "-c", "npx prisma db push --skip-generate && node dist/index.js"]
