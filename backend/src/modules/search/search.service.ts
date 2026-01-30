@@ -104,7 +104,7 @@ class SearchService {
     filtered = filtered.slice(0, filters.limit);
 
     // Group by type
-    const groupedResults = filtered.reduce((acc, result) => {
+    const groupedResults = filtered.reduce<Record<ModuleType, SearchResult[]>>((acc, result) => {
       if (!acc[result.type]) acc[result.type] = [];
       acc[result.type].push(result);
       return acc;
