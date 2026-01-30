@@ -9,6 +9,7 @@ import {
   updateRegistrySchema,
   registryQuerySchema,
   exportRegistrySchema,
+  RegistryQueryInput,
 } from './registries.schema.js';
 
 const router = Router();
@@ -25,7 +26,7 @@ router.get(
       const pagination = parsePagination(req.query);
       const result = await registriesService.findAll(
         req.user!.userId,
-        req.query as Record<string, string>,
+        req.query as unknown as RegistryQueryInput,
         pagination
       );
       res.json({ success: true, ...result });

@@ -71,7 +71,7 @@ class FavoritesService {
     return { success: true };
   }
 
-  async reorder(userId: string, items: { id: string; position: number }[]) {
+  async reorder(_userId: string, items: { id: string; position: number }[]) {
     await prisma.$transaction(
       items.map((item) =>
         prisma.favorite.update({
