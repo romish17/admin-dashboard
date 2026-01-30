@@ -14,6 +14,7 @@ import { ScriptDetail } from '@/pages/scripts/ScriptDetail';
 import { ScriptEdit } from '@/pages/scripts/ScriptEdit';
 import { NotesList } from '@/pages/notes/NotesList';
 import { TodosList } from '@/pages/todos/TodosList';
+import { ProjectsList } from '@/pages/projects/ProjectsList';
 import { RegistriesList } from '@/pages/registries/RegistriesList';
 import { ProceduresList } from '@/pages/procedures/ProceduresList';
 import { ZabbixList } from '@/pages/zabbix/ZabbixList';
@@ -90,6 +91,9 @@ export default function App() {
 
         {/* Todos */}
         <Route path="todos" element={<TodosList />} />
+
+        {/* Projects */}
+        <Route path="projects" element={<ProjectsList />} />
 
         {/* Registries */}
         <Route path="registries" element={<RegistriesList />} />
