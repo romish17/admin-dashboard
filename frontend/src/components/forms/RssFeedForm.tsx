@@ -22,14 +22,15 @@ interface RssFeedFormProps {
   isLoading?: boolean;
 }
 
+// Values in seconds (backend expects 300-86400)
 const REFRESH_RATES = [
-  { value: 15, label: 'Every 15 minutes' },
-  { value: 30, label: 'Every 30 minutes' },
-  { value: 60, label: 'Every hour' },
-  { value: 120, label: 'Every 2 hours' },
-  { value: 360, label: 'Every 6 hours' },
-  { value: 720, label: 'Every 12 hours' },
-  { value: 1440, label: 'Daily' },
+  { value: 900, label: 'Every 15 minutes' },
+  { value: 1800, label: 'Every 30 minutes' },
+  { value: 3600, label: 'Every hour' },
+  { value: 7200, label: 'Every 2 hours' },
+  { value: 21600, label: 'Every 6 hours' },
+  { value: 43200, label: 'Every 12 hours' },
+  { value: 86400, label: 'Daily' },
 ];
 
 export function RssFeedForm({ feed, onSubmit, onCancel, isLoading }: RssFeedFormProps) {
@@ -41,7 +42,7 @@ export function RssFeedForm({ feed, onSubmit, onCancel, isLoading }: RssFeedForm
       description: feed?.description || '',
       url: feed?.url || '',
       siteUrl: feed?.siteUrl || '',
-      refreshRate: feed?.refreshRate || 60,
+      refreshRate: feed?.refreshRate || 3600,
       isActive: feed?.isActive ?? true,
       showOnHome: feed?.showOnHome ?? false,
       categoryId: feed?.category?.id || '',
