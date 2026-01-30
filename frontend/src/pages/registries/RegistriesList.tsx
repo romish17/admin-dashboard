@@ -1,14 +1,19 @@
 import { useEffect, useState } from 'react';
-import { apiGet, getErrorMessage } from '@/services/api';
+import { apiGet, apiPost, apiPut, getErrorMessage } from '@/services/api';
 import { RegistryEntry, PaginatedResponse } from '@/types';
-import { PlusIcon, MagnifyingGlassIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, MagnifyingGlassIcon, ArrowDownTrayIcon, PencilIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import { Modal } from '@/components/ui/Modal';
+import { RegistryForm } from '@/components/forms/RegistryForm';
 
 export function RegistriesList() {
   const [entries, setEntries] = useState<RegistryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<RegistryEntry | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     fetchEntries();
@@ -51,6 +56,45 @@ export function RegistriesList() {
     }
   }
 
+  function openModal(entry?: RegistryEntry) {
+    setEditingEntry(entry || null);
+    setIsModalOpen(true);
+  }
+
+  function closeModal() {
+    setIsModalOpen(false);
+    setEditingEntry(null);
+  }
+
+  async function handleSubmit(data: {
+    name: string;
+    description?: string;
+    keyPath: string;
+    valueName: string;
+    valueData: string;
+    valueType: RegistryEntry['valueType'];
+    isEnabled: boolean;
+    categoryId?: string;
+    tagIds: string[];
+  }) {
+    setIsSaving(true);
+    try {
+      if (editingEntry) {
+        await apiPut(`/registries/${editingEntry.id}`, data);
+        toast.success('Registry entry updated successfully');
+      } else {
+        await apiPost('/registries', data);
+        toast.success('Registry entry created successfully');
+      }
+      closeModal();
+      fetchEntries();
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -65,7 +109,7 @@ export function RegistriesList() {
               Export ({selected.size})
             </button>
           )}
-          <button className="btn-primary">
+          <button onClick={() => openModal()} className="btn-primary">
             <PlusIcon className="w-5 h-5 mr-2" />
             New Entry
           </button>
@@ -116,6 +160,7 @@ export function RegistriesList() {
                 <th className="p-3 text-left text-dark-300 font-medium">Key Path</th>
                 <th className="p-3 text-left text-dark-300 font-medium">Type</th>
                 <th className="p-3 text-left text-dark-300 font-medium">Value</th>
+                <th className="p-3 text-left text-dark-300 font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -143,12 +188,34 @@ export function RegistriesList() {
                     <span className="badge bg-blue-500/20 text-blue-400">{entry.valueType}</span>
                   </td>
                   <td className="p-3 text-dark-400 font-mono text-sm truncate max-w-xs">{entry.valueData}</td>
+                  <td className="p-3">
+                    <button
+                      onClick={() => openModal(entry)}
+                      className="p-1 hover:bg-dark-600 rounded"
+                    >
+                      <PencilIcon className="w-4 h-4 text-dark-400" />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        title={editingEntry ? 'Edit Registry Entry' : 'New Registry Entry'}
+        size="lg"
+      >
+        <RegistryForm
+          entry={editingEntry || undefined}
+          onSubmit={handleSubmit}
+          onCancel={closeModal}
+          isLoading={isSaving}
+        />
+      </Modal>
     </div>
   );
 }

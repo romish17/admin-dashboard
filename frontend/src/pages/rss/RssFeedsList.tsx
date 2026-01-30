@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import { apiGet, apiPost, getErrorMessage } from '@/services/api';
+import { apiGet, apiPost, apiPut, getErrorMessage } from '@/services/api';
 import { RssFeed, RssItem, PaginatedResponse } from '@/types';
-import { PlusIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, ArrowPathIcon, PencilIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import toast from 'react-hot-toast';
 import { formatDistanceToNow } from 'date-fns';
+import { Modal } from '@/components/ui/Modal';
+import { RssFeedForm } from '@/components/forms/RssFeedForm';
 
 export function RssFeedsList() {
   const [feeds, setFeeds] = useState<RssFeed[]>([]);
@@ -12,6 +14,9 @@ export function RssFeedsList() {
   const [selectedFeed, setSelectedFeed] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingFeed, setEditingFeed] = useState<RssFeed | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     fetchFeeds();
@@ -63,6 +68,44 @@ export function RssFeedsList() {
     }
   }
 
+  function openModal(feed?: RssFeed) {
+    setEditingFeed(feed || null);
+    setIsModalOpen(true);
+  }
+
+  function closeModal() {
+    setIsModalOpen(false);
+    setEditingFeed(null);
+  }
+
+  async function handleSubmit(data: {
+    title: string;
+    description?: string;
+    url: string;
+    siteUrl?: string;
+    refreshRate: number;
+    isActive: boolean;
+    showOnHome: boolean;
+    categoryId?: string;
+  }) {
+    setIsSaving(true);
+    try {
+      if (editingFeed) {
+        await apiPut(`/rss/feeds/${editingFeed.id}`, data);
+        toast.success('RSS feed updated successfully');
+      } else {
+        await apiPost('/rss/feeds', data);
+        toast.success('RSS feed added successfully');
+      }
+      closeModal();
+      fetchFeeds();
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -75,7 +118,7 @@ export function RssFeedsList() {
             <ArrowPathIcon className={clsx('w-5 h-5 mr-2', isRefreshing && 'animate-spin')} />
             Refresh All
           </button>
-          <button className="btn-primary">
+          <button onClick={() => openModal()} className="btn-primary">
             <PlusIcon className="w-5 h-5 mr-2" />
             Add Feed
           </button>
@@ -98,19 +141,31 @@ export function RssFeedsList() {
                 All Feeds
               </button>
               {feeds.map((feed) => (
-                <button
+                <div
                   key={feed.id}
-                  onClick={() => setSelectedFeed(feed.id)}
                   className={clsx(
-                    'w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between',
+                    'w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between group',
                     selectedFeed === feed.id ? 'bg-primary-600/20 text-primary-400' : 'text-dark-300 hover:bg-dark-700'
                   )}
                 >
-                  <span className="truncate">{feed.title}</span>
-                  {feed.unreadCount ? (
-                    <span className="badge bg-primary-500/20 text-primary-400">{feed.unreadCount}</span>
-                  ) : null}
-                </button>
+                  <button
+                    onClick={() => setSelectedFeed(feed.id)}
+                    className="truncate flex-1 text-left"
+                  >
+                    {feed.title}
+                  </button>
+                  <div className="flex items-center gap-1">
+                    {feed.unreadCount ? (
+                      <span className="badge bg-primary-500/20 text-primary-400">{feed.unreadCount}</span>
+                    ) : null}
+                    <button
+                      onClick={(e) => { e.stopPropagation(); openModal(feed); }}
+                      className="p-1 hover:bg-dark-600 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <PencilIcon className="w-3 h-3 text-dark-400" />
+                    </button>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
@@ -175,6 +230,19 @@ export function RssFeedsList() {
           )}
         </div>
       </div>
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        title={editingFeed ? 'Edit RSS Feed' : 'Add RSS Feed'}
+      >
+        <RssFeedForm
+          feed={editingFeed || undefined}
+          onSubmit={handleSubmit}
+          onCancel={closeModal}
+          isLoading={isSaving}
+        />
+      </Modal>
     </div>
   );
 }
