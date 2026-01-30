@@ -26,6 +26,9 @@ import { tagsRouter } from './modules/tags/tags.controller.js';
 export function createApp() {
   const app = express();
 
+  // Trust proxy (required when behind nginx/load balancer)
+  app.set('trust proxy', 1);
+
   // Security middleware
   app.use(helmet({
     contentSecurityPolicy: config.isProduction ? undefined : false,
