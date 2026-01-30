@@ -3,6 +3,15 @@ import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[\/]/g, '-')
+    .replace(/\s+/g, '-');
+}
+
 async function main() {
   console.log('🌱 Seeding database...');
 
@@ -27,6 +36,8 @@ async function main() {
       },
     });
     console.log('✅ Admin user created');
+  } else {
+    console.log('ℹ️  Admin user already exists');
   }
 
   // Default categories
@@ -44,12 +55,18 @@ async function main() {
   ];
 
   for (const cat of defaultCategories) {
+    const slug = slugify(cat.name);
     await prisma.category.upsert({
-      where: { slug: cat.name.toLowerCase().replace(/\s+/g, '-').normalize('NFD').replace(/[\u0300-\u036f]/g, '') },
+      where: {
+        userId_slug: {
+          userId: adminUser.id,
+          slug: slug,
+        },
+      },
       update: {},
       create: {
         name: cat.name,
-        slug: cat.name.toLowerCase().replace(/\s+/g, '-').normalize('NFD').replace(/[\u0300-\u036f]/g, ''),
+        slug: slug,
         color: cat.color,
         description: cat.description,
         icon: cat.icon,
@@ -75,7 +92,7 @@ async function main() {
     { name: 'Zabbix', color: '#d40000' },
     { name: 'Nginx', color: '#009639' },
     { name: 'Apache', color: '#d22128' },
-    { name: 'SSL/TLS', color: '#721c24' },
+    { name: 'SSL-TLS', color: '#721c24' },
     { name: 'Firewall', color: '#c62828' },
     { name: 'Active Directory', color: '#0078d4' },
     { name: 'VMware', color: '#607078' },
@@ -85,16 +102,22 @@ async function main() {
     { name: 'Staging', color: '#f59e0b' },
     { name: 'Test', color: '#22c55e' },
     { name: 'Urgent', color: '#ef4444' },
-    { name: 'À revoir', color: '#8b5cf6' },
+    { name: 'A revoir', color: '#8b5cf6' },
   ];
 
   for (const tag of defaultTags) {
+    const slug = slugify(tag.name);
     await prisma.tag.upsert({
-      where: { slug: tag.name.toLowerCase().replace(/\s+/g, '-').replace(/[\/]/g, '-').normalize('NFD').replace(/[\u0300-\u036f]/g, '') },
+      where: {
+        userId_slug: {
+          userId: adminUser.id,
+          slug: slug,
+        },
+      },
       update: {},
       create: {
         name: tag.name,
-        slug: tag.name.toLowerCase().replace(/\s+/g, '-').replace(/[\/]/g, '-').normalize('NFD').replace(/[\u0300-\u036f]/g, ''),
+        slug: slug,
         color: tag.color,
         userId: adminUser.id,
       },
@@ -103,7 +126,7 @@ async function main() {
   console.log('✅ Default tags created');
 
   // Default project
-  const defaultProject = await prisma.project.upsert({
+  await prisma.project.upsert({
     where: { id: 'default-project' },
     update: {},
     create: {
