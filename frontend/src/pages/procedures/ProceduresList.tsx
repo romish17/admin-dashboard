@@ -1,14 +1,19 @@
 import { useEffect, useState } from 'react';
-import { apiGet, getErrorMessage } from '@/services/api';
+import { apiGet, apiPost, apiPut, getErrorMessage } from '@/services/api';
 import { Procedure, PaginatedResponse } from '@/types';
-import { PlusIcon, MagnifyingGlassIcon, BookOpenIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, MagnifyingGlassIcon, BookOpenIcon, PencilIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import { formatDistanceToNow } from 'date-fns';
+import { Modal } from '@/components/ui/Modal';
+import { ProcedureForm } from '@/components/forms/ProcedureForm';
 
 export function ProceduresList() {
   const [procedures, setProcedures] = useState<Procedure[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProcedure, setEditingProcedure] = useState<Procedure | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     fetchProcedures();
@@ -28,6 +33,48 @@ export function ProceduresList() {
     }
   }
 
+  function openModal(procedure?: Procedure) {
+    setEditingProcedure(procedure || null);
+    setIsModalOpen(true);
+  }
+
+  function closeModal() {
+    setIsModalOpen(false);
+    setEditingProcedure(null);
+  }
+
+  async function handleSubmit(data: {
+    title: string;
+    description?: string;
+    version: string;
+    isPinned: boolean;
+    categoryId?: string;
+    tagIds: string[];
+    steps: {
+      stepNumber: number;
+      title: string;
+      content: string;
+      isOptional: boolean;
+    }[];
+  }) {
+    setIsSaving(true);
+    try {
+      if (editingProcedure) {
+        await apiPut(`/procedures/${editingProcedure.id}`, data);
+        toast.success('Procedure updated successfully');
+      } else {
+        await apiPost('/procedures', data);
+        toast.success('Procedure created successfully');
+      }
+      closeModal();
+      fetchProcedures();
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -35,7 +82,7 @@ export function ProceduresList() {
           <h1 className="text-2xl font-bold text-dark-100">Procedures</h1>
           <p className="text-dark-400">Step-by-step documentation and guides</p>
         </div>
-        <button className="btn-primary">
+        <button onClick={() => openModal()} className="btn-primary">
           <PlusIcon className="w-5 h-5 mr-2" />
           New Procedure
         </button>
@@ -66,13 +113,21 @@ export function ProceduresList() {
       ) : (
         <div className="grid md:grid-cols-2 gap-4">
           {procedures.map((proc) => (
-            <div key={proc.id} className="card-hover cursor-pointer">
+            <div key={proc.id} className="card-hover cursor-pointer group" onClick={() => openModal(proc)}>
               <div className="flex items-start gap-4">
                 <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
                   <BookOpenIcon className="w-5 h-5 text-purple-400" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-medium text-dark-100">{proc.title}</h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-medium text-dark-100 group-hover:text-primary-400">{proc.title}</h3>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); openModal(proc); }}
+                      className="p-1 hover:bg-dark-600 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <PencilIcon className="w-4 h-4 text-dark-400" />
+                    </button>
+                  </div>
                   {proc.description && (
                     <p className="text-dark-400 text-sm mt-1 line-clamp-2">{proc.description}</p>
                   )}
@@ -87,6 +142,20 @@ export function ProceduresList() {
           ))}
         </div>
       )}
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        title={editingProcedure ? 'Edit Procedure' : 'New Procedure'}
+        size="xl"
+      >
+        <ProcedureForm
+          procedure={editingProcedure || undefined}
+          onSubmit={handleSubmit}
+          onCancel={closeModal}
+          isLoading={isSaving}
+        />
+      </Modal>
     </div>
   );
 }
