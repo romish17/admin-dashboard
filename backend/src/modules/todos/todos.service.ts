@@ -156,7 +156,7 @@ class TodosService {
     // Handle completion timestamp
     if (data.status === TodoStatus.DONE) {
       updateData.completedAt = new Date();
-    } else if (data.status && data.status !== TodoStatus.DONE) {
+    } else if (data.status) {
       updateData.completedAt = null;
     }
 

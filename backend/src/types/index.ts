@@ -58,7 +58,7 @@ export interface SearchResult {
   id: string;
   type: ModuleType;
   title: string;
-  description?: string;
+  description?: string | null;
   tags: string[];
   categories: string[];
   createdAt: Date;

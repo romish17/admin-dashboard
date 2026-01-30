@@ -1,6 +1,6 @@
 import Parser from 'rss-parser';
 import { prisma } from '../../config/database.js';
-import { redis, REDIS_KEYS, REDIS_TTL } from '../../config/redis.js';
+import { redis, REDIS_KEYS } from '../../config/redis.js';
 import { NotFoundError } from '../../middleware/errorHandler.js';
 import { PaginationParams, paginatedResponse, getPrismaSkipTake } from '../../utils/pagination.js';
 import { logger } from '../../utils/logger.js';

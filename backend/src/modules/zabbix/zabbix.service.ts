@@ -1,4 +1,4 @@
-import { ZabbixType } from '@prisma/client';
+import { ZabbixType, Prisma } from '@prisma/client';
 import { prisma } from '../../config/database.js';
 import { NotFoundError } from '../../middleware/errorHandler.js';
 import { PaginationParams, paginatedResponse, getPrismaSkipTake } from '../../utils/pagination.js';
@@ -89,11 +89,12 @@ class ZabbixService {
   }
 
   async create(userId: string, data: CreateZabbixInput) {
-    const { tagIds, linkedNoteIds, ...itemData } = data;
+    const { tagIds, linkedNoteIds, content, ...itemData } = data;
 
     const item = await prisma.zabbixItem.create({
       data: {
         ...itemData,
+        content: content as Prisma.InputJsonValue,
         userId,
         tags: tagIds?.length ? { create: tagIds.map((tagId) => ({ tagId })) } : undefined,
         notes: linkedNoteIds?.length ? { create: linkedNoteIds.map((noteId) => ({ noteId })) } : undefined,
@@ -104,12 +105,18 @@ class ZabbixService {
       },
     });
 
-    return { ...item, tags: item.tags.map((t) => t.tag) };
+    return { ...item, tags: item.tags.map((t: { tag: unknown }) => t.tag) };
   }
 
   async update(id: string, userId: string, data: UpdateZabbixInput) {
     await this.findById(id, userId);
-    const { tagIds, linkedNoteIds, ...itemData } = data;
+    const { tagIds, linkedNoteIds, content, ...restData } = data;
+
+    // Build update data, casting content if present
+    const updateData: Prisma.ZabbixItemUpdateInput = {
+      ...restData,
+      ...(content !== undefined && { content: content as Prisma.InputJsonValue }),
+    };
 
     const item = await prisma.$transaction(async (tx) => {
       if (tagIds !== undefined) {
@@ -132,12 +139,12 @@ class ZabbixService {
 
       return tx.zabbixItem.update({
         where: { id },
-        data: itemData,
+        data: updateData,
         include: { category: true, tags: { include: { tag: true } } },
       });
     });
 
-    return { ...item, tags: item.tags.map((t) => t.tag) };
+    return { ...item, tags: item.tags.map((t: { tag: unknown }) => t.tag) };
   }
 
   async delete(id: string, userId: string) {

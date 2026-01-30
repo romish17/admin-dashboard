@@ -8,6 +8,7 @@ import {
   createScriptSchema,
   updateScriptSchema,
   scriptQuerySchema,
+  ScriptQueryInput,
 } from './scripts.schema.js';
 
 const router = Router();
@@ -25,7 +26,7 @@ router.get(
       const pagination = parsePagination(req.query);
       const result = await scriptsService.findAll(
         req.user!.userId,
-        req.query as Record<string, string>,
+        req.query as unknown as ScriptQueryInput,
         pagination
       );
       res.json({ success: true, ...result });

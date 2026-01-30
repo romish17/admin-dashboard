@@ -240,12 +240,12 @@ class AuthService {
 
     const accessToken = jwt.sign(accessTokenPayload, config.jwt.accessSecret, {
       expiresIn: config.jwt.accessExpiresIn,
-    });
+    } as jwt.SignOptions);
 
     const refreshToken = jwt.sign(
       { ...accessTokenPayload, jti },
       config.jwt.refreshSecret,
-      { expiresIn: config.jwt.refreshExpiresIn }
+      { expiresIn: config.jwt.refreshExpiresIn } as jwt.SignOptions
     );
 
     // Store refresh token in Redis

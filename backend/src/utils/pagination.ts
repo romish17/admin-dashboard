@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import { PaginationParams, PaginatedResponse } from '../types/index.js';
 
+export { PaginationParams, PaginatedResponse } from '../types/index.js';
+
 export const paginationQuerySchema = z.object({
   page: z.string().optional().default('1').transform(Number),
   limit: z.string().optional().default('20').transform(Number),
