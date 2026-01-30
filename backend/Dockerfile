@@ -13,8 +13,8 @@ RUN apk add --no-cache libc6-compat
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Install dependencies
-RUN npm ci --only=production
+# Install all dependencies (need tsx for seed)
+RUN npm ci
 
 # Generate Prisma client
 RUN npx prisma generate
@@ -52,7 +52,7 @@ RUN apk add --no-cache openssl libc6-compat
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 appuser
 
-# Copy production dependencies
+# Copy dependencies (including tsx for seed)
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/prisma ./prisma
 
@@ -75,5 +75,5 @@ EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:4000/health || exit 1
 
-# Start command with database sync
-CMD ["sh", "-c", "npx prisma db push --skip-generate && node dist/index.js"]
+# Start command with database sync and seed
+CMD ["sh", "-c", "npx prisma db push --skip-generate && npx tsx prisma/seed.ts && node dist/index.js"]
