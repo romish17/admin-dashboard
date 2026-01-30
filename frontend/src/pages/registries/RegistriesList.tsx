@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { apiGet, apiPost, getErrorMessage } from '@/services/api';
+import { apiGet, getErrorMessage } from '@/services/api';
 import { RegistryEntry, PaginatedResponse } from '@/types';
 import { PlusIcon, MagnifyingGlassIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';

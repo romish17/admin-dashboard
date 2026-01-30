@@ -25,7 +25,7 @@ const languageColors: Record<string, string> = {
 export function ScriptsList() {
   const [scripts, setScripts] = useState<Script[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [tags, setTags] = useState<Tag[]>([]);
+  const [_tags, setTags] = useState<Tag[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
