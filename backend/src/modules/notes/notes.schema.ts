@@ -6,7 +6,7 @@ export const createNoteSchema = z.object({
   isMarkdown: z.boolean().default(true),
   isPinned: z.boolean().default(false),
   isFavorite: z.boolean().default(false),
-  categoryId: z.string().uuid().optional().nullable(),
+  categoryId: z.string().uuid().optional().nullable().or(z.literal('')).transform(v => v || null),
   tagIds: z.array(z.string().uuid()).optional().default([]),
 });
 

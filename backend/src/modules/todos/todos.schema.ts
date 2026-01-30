@@ -3,7 +3,7 @@ import { TodoStatus, TodoPriority, ProjectStatus } from '@prisma/client';
 
 export const createProjectSchema = z.object({
   name: z.string().min(1).max(100),
-  description: z.string().max(500).optional(),
+  description: z.string().max(500).optional().or(z.literal('')).transform(v => v || undefined),
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).default('#3B82F6'),
   status: z.nativeEnum(ProjectStatus).default(ProjectStatus.ACTIVE),
 });
@@ -12,15 +12,15 @@ export const updateProjectSchema = createProjectSchema.partial();
 
 export const createTodoSchema = z.object({
   title: z.string().min(1, 'Title is required').max(300),
-  description: z.string().max(2000).optional(),
+  description: z.string().max(2000).optional().or(z.literal('')).transform(v => v || undefined),
   status: z.nativeEnum(TodoStatus).default(TodoStatus.TODO),
   priority: z.nativeEnum(TodoPriority).default(TodoPriority.MEDIUM),
-  dueDate: z.string().datetime().optional().nullable(),
+  dueDate: z.string().optional().nullable().or(z.literal('')).transform(v => v || null),
   isPinned: z.boolean().default(false),
   isFavorite: z.boolean().default(false),
-  projectId: z.string().uuid().optional().nullable(),
-  categoryId: z.string().uuid().optional().nullable(),
-  parentId: z.string().uuid().optional().nullable(),
+  projectId: z.string().uuid().optional().nullable().or(z.literal('')).transform(v => v || null),
+  categoryId: z.string().uuid().optional().nullable().or(z.literal('')).transform(v => v || null),
+  parentId: z.string().uuid().optional().nullable().or(z.literal('')).transform(v => v || null),
   tagIds: z.array(z.string().uuid()).optional().default([]),
 });
 

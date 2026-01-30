@@ -5,11 +5,11 @@ import { z } from 'zod';
 
 export const createFavoriteSchema = z.object({
   title: z.string().min(1).max(100),
-  description: z.string().max(500).optional(),
-  icon: z.string().max(50).optional(),
-  url: z.string().url().optional().nullable(),
+  description: z.string().max(500).optional().or(z.literal('')).transform(v => v || undefined),
+  icon: z.string().max(50).optional().or(z.literal('')).transform(v => v || undefined),
+  url: z.string().url().optional().nullable().or(z.literal('')).transform(v => v || null),
   targetType: z.nativeEnum(TargetType).optional().nullable(),
-  targetId: z.string().uuid().optional().nullable(),
+  targetId: z.string().uuid().optional().nullable().or(z.literal('')).transform(v => v || null),
   position: z.number().int().min(0).default(0),
 });
 

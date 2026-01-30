@@ -12,11 +12,11 @@ export const procedureStepSchema = z.object({
 
 export const createProcedureSchema = z.object({
   title: z.string().min(1).max(200),
-  description: z.string().max(1000).optional(),
+  description: z.string().max(1000).optional().or(z.literal('')).transform(v => v || undefined),
   version: z.string().max(20).default('1.0'),
   isPinned: z.boolean().default(false),
   isFavorite: z.boolean().default(false),
-  categoryId: z.string().uuid().optional().nullable(),
+  categoryId: z.string().uuid().optional().nullable().or(z.literal('')).transform(v => v || null),
   tagIds: z.array(z.string().uuid()).optional().default([]),
   steps: z.array(procedureStepSchema).optional().default([]),
 });
