@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Favorite } from '@/types';
-import { GlobeAltIcon } from '@heroicons/react/24/outline';
 
 interface FavoriteFormData {
   title: string;
