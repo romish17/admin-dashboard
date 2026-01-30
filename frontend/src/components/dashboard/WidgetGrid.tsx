@@ -1,7 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import {
   Cog6ToothIcon,
-  XMarkIcon,
   Bars3Icon,
   PlusIcon,
   EyeIcon,
