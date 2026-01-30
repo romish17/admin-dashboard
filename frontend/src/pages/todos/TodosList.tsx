@@ -1,0 +1,161 @@
+import { useEffect, useState } from 'react';
+import { apiGet, apiPost, getErrorMessage } from '@/services/api';
+import { Todo, Project, PaginatedResponse } from '@/types';
+import { PlusIcon, CheckIcon, ClockIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
+import clsx from 'clsx';
+import toast from 'react-hot-toast';
+
+const statusColors = {
+  TODO: 'bg-dark-600',
+  IN_PROGRESS: 'bg-blue-500',
+  DONE: 'bg-green-500',
+  CANCELLED: 'bg-gray-500',
+};
+
+const priorityColors = {
+  URGENT: 'border-l-red-500',
+  HIGH: 'border-l-orange-500',
+  MEDIUM: 'border-l-yellow-500',
+  LOW: 'border-l-green-500',
+};
+
+export function TodosList() {
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedProject, setSelectedProject] = useState<string>('');
+
+  useEffect(() => {
+    fetchData();
+  }, [selectedProject]);
+
+  async function fetchData() {
+    setIsLoading(true);
+    try {
+      const params: Record<string, string> = { showCompleted: 'false' };
+      if (selectedProject) params.projectId = selectedProject;
+
+      const [todosRes, projectsRes] = await Promise.all([
+        apiGet<PaginatedResponse<Todo>>('/todos', params),
+        apiGet<Project[]>('/todos/projects'),
+      ]);
+      setTodos(todosRes.data);
+      setProjects(projectsRes);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function toggleTodo(id: string) {
+    try {
+      const result = await apiPost<Todo>(`/todos/${id}/toggle`);
+      setTodos(todos.map(t => t.id === id ? result : t));
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-dark-100">Todos</h1>
+          <p className="text-dark-400">Manage your tasks and projects</p>
+        </div>
+        <button className="btn-primary">
+          <PlusIcon className="w-5 h-5 mr-2" />
+          New Task
+        </button>
+      </div>
+
+      {/* Projects filter */}
+      <div className="flex gap-2 overflow-x-auto pb-2">
+        <button
+          onClick={() => setSelectedProject('')}
+          className={clsx(
+            'px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors',
+            !selectedProject ? 'bg-primary-600 text-white' : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
+          )}
+        >
+          All Tasks
+        </button>
+        {projects.map((project) => (
+          <button
+            key={project.id}
+            onClick={() => setSelectedProject(project.id)}
+            className={clsx(
+              'px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors',
+              selectedProject === project.id ? 'bg-primary-600 text-white' : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
+            )}
+            style={selectedProject === project.id ? {} : { borderLeft: `3px solid ${project.color}` }}
+          >
+            {project.name}
+          </button>
+        ))}
+      </div>
+
+      {isLoading ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full" />
+        </div>
+      ) : todos.length === 0 ? (
+        <div className="card text-center py-12">
+          <p className="text-dark-400">No tasks found. Create your first task!</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {todos.map((todo) => (
+            <div
+              key={todo.id}
+              className={clsx(
+                'card-hover flex items-center gap-4 border-l-4',
+                priorityColors[todo.priority]
+              )}
+            >
+              <button
+                onClick={() => toggleTodo(todo.id)}
+                className={clsx(
+                  'w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors',
+                  todo.status === 'DONE'
+                    ? 'bg-green-500 border-green-500'
+                    : 'border-dark-500 hover:border-primary-500'
+                )}
+              >
+                {todo.status === 'DONE' && <CheckIcon className="w-4 h-4 text-white" />}
+              </button>
+
+              <div className="flex-1 min-w-0">
+                <h3 className={clsx(
+                  'font-medium',
+                  todo.status === 'DONE' ? 'text-dark-500 line-through' : 'text-dark-100'
+                )}>
+                  {todo.title}
+                </h3>
+                {todo.description && (
+                  <p className="text-dark-400 text-sm truncate">{todo.description}</p>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                {todo.project && (
+                  <span
+                    className="text-xs px-2 py-1 rounded"
+                    style={{ backgroundColor: `${todo.project.color}20`, color: todo.project.color }}
+                  >
+                    {todo.project.name}
+                  </span>
+                )}
+                <span className={clsx(
+                  'w-2 h-2 rounded-full',
+                  statusColors[todo.status]
+                )} />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
