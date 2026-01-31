@@ -3,16 +3,17 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { apiGet, apiDelete, apiPost, getErrorMessage } from '@/services/api';
 import { Script } from '@/types';
 import {
-  ArrowLeft,
-  Pencil,
-  Trash2,
-  Star,
-  Clipboard,
-} from 'lucide-react';
+  ArrowLeftIcon,
+  PencilIcon,
+  TrashIcon,
+  StarIcon,
+  ClipboardIcon,
+} from '@heroicons/react/24/outline';
+import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
+import clsx from 'clsx';
+import toast from 'react-hot-toast';
 import { formatDistanceToNow } from 'date-fns';
 
 const languageMap: Record<string, string> = {
@@ -87,7 +88,7 @@ export function ScriptDetail() {
   }
 
   if (!script) {
-    return <div className="text-muted-foreground">Script not found</div>;
+    return <div className="text-dark-400">Script not found</div>;
   }
 
   return (
@@ -96,11 +97,11 @@ export function ScriptDetail() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-4">
           <Link to="/scripts" className="btn-ghost p-2">
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeftIcon className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">{script.title}</h1>
-            <p className="text-muted-foreground text-sm">
+            <h1 className="text-2xl font-bold text-dark-100">{script.title}</h1>
+            <p className="text-dark-400 text-sm">
               Version {script.version} • Updated {formatDistanceToNow(new Date(script.updatedAt), { addSuffix: true })}
             </p>
           </div>
@@ -108,21 +109,21 @@ export function ScriptDetail() {
         <div className="flex items-center gap-2">
           <button onClick={toggleFavorite} className="btn-ghost p-2">
             {script.isFavorite ? (
-              <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+              <StarSolidIcon className="w-5 h-5 text-yellow-400" />
             ) : (
-              <Star className="w-5 h-5" />
+              <StarIcon className="w-5 h-5" />
             )}
           </button>
           <button onClick={copyToClipboard} className="btn-secondary">
-            <Clipboard className="w-5 h-5 mr-2" />
+            <ClipboardIcon className="w-5 h-5 mr-2" />
             Copy
           </button>
           <Link to={`/scripts/${script.id}/edit`} className="btn-secondary">
-            <Pencil className="w-5 h-5 mr-2" />
+            <PencilIcon className="w-5 h-5 mr-2" />
             Edit
           </Link>
           <button onClick={handleDelete} className="btn-danger">
-            <Trash2 className="w-5 h-5 mr-2" />
+            <TrashIcon className="w-5 h-5 mr-2" />
             Delete
           </button>
         </div>
@@ -131,7 +132,7 @@ export function ScriptDetail() {
       {/* Info */}
       <div className="card">
         <div className="flex flex-wrap items-center gap-4">
-          <span className={cn(
+          <span className={clsx(
             'badge',
             script.language === 'BASH' && 'bg-green-500/20 text-green-400',
             script.language === 'POWERSHELL' && 'bg-blue-500/20 text-blue-400',
@@ -148,19 +149,19 @@ export function ScriptDetail() {
             </span>
           )}
           {script.tags.map((tag) => (
-            <span key={tag.id} className="text-sm text-muted-foreground">#{tag.name}</span>
+            <span key={tag.id} className="text-sm text-dark-400">#{tag.name}</span>
           ))}
         </div>
         {script.description && (
-          <p className="text-muted-foreground mt-4">{script.description}</p>
+          <p className="text-dark-300 mt-4">{script.description}</p>
         )}
       </div>
 
       {/* Code */}
       <div className="card p-0 overflow-hidden">
-        <div className="bg-dark-950 p-4 border-b border-border flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">Script Content</span>
-          <span className="text-xs text-muted-foreground">{script.content.split('\n').length} lines</span>
+        <div className="bg-dark-950 p-4 border-b border-dark-700 flex items-center justify-between">
+          <span className="text-sm text-dark-400">Script Content</span>
+          <span className="text-xs text-dark-500">{script.content.split('\n').length} lines</span>
         </div>
         <SyntaxHighlighter
           language={languageMap[script.language] || 'text'}

@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { apiGet, apiPost, apiPut, getErrorMessage } from '@/services/api';
 import { Todo, Project, PaginatedResponse } from '@/types';
-import { Plus, Check, Pencil } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
+import { PlusIcon, CheckIcon, PencilIcon } from '@heroicons/react/24/outline';
+import clsx from 'clsx';
+import toast from 'react-hot-toast';
 import { Modal } from '@/components/ui/Modal';
 import { TodoForm } from '@/components/forms/TodoForm';
 
@@ -104,11 +104,11 @@ export function TodosList() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Todos</h1>
-          <p className="text-muted-foreground">Manage your tasks and projects</p>
+          <h1 className="text-2xl font-bold text-dark-100">Todos</h1>
+          <p className="text-dark-400">Manage your tasks and projects</p>
         </div>
         <button onClick={() => openModal()} className="btn-primary">
-          <Plus className="w-5 h-5 mr-2" />
+          <PlusIcon className="w-5 h-5 mr-2" />
           New Task
         </button>
       </div>
@@ -117,9 +117,9 @@ export function TodosList() {
       <div className="flex gap-2 overflow-x-auto pb-2">
         <button
           onClick={() => setSelectedProject('')}
-          className={cn(
+          className={clsx(
             'px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors',
-            !selectedProject ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:bg-dark-600'
+            !selectedProject ? 'bg-primary-600 text-white' : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
           )}
         >
           All Tasks
@@ -128,9 +128,9 @@ export function TodosList() {
           <button
             key={project.id}
             onClick={() => setSelectedProject(project.id)}
-            className={cn(
+            className={clsx(
               'px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors',
-              selectedProject === project.id ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:bg-dark-600'
+              selectedProject === project.id ? 'bg-primary-600 text-white' : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
             )}
             style={selectedProject === project.id ? {} : { borderLeft: `3px solid ${project.color}` }}
           >
@@ -145,39 +145,39 @@ export function TodosList() {
         </div>
       ) : todos.length === 0 ? (
         <div className="card text-center py-12">
-          <p className="text-muted-foreground">No tasks found. Create your first task!</p>
+          <p className="text-dark-400">No tasks found. Create your first task!</p>
         </div>
       ) : (
         <div className="space-y-2">
           {todos.map((todo) => (
             <div
               key={todo.id}
-              className={cn(
+              className={clsx(
                 'card-hover flex items-center gap-4 border-l-4',
                 priorityColors[todo.priority]
               )}
             >
               <button
                 onClick={() => toggleTodo(todo.id)}
-                className={cn(
+                className={clsx(
                   'w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors',
                   todo.status === 'DONE'
                     ? 'bg-green-500 border-green-500'
-                    : 'border-muted-foreground hover:border-primary-500'
+                    : 'border-dark-500 hover:border-primary-500'
                 )}
               >
-                {todo.status === 'DONE' && <Check className="w-4 h-4 text-white" />}
+                {todo.status === 'DONE' && <CheckIcon className="w-4 h-4 text-white" />}
               </button>
 
               <div className="flex-1 min-w-0 cursor-pointer" onClick={() => openModal(todo)}>
-                <h3 className={cn(
+                <h3 className={clsx(
                   'font-medium',
-                  todo.status === 'DONE' ? 'text-muted-foreground line-through' : 'text-foreground'
+                  todo.status === 'DONE' ? 'text-dark-500 line-through' : 'text-dark-100'
                 )}>
                   {todo.title}
                 </h3>
                 {todo.description && (
-                  <p className="text-muted-foreground text-sm truncate">{todo.description}</p>
+                  <p className="text-dark-400 text-sm truncate">{todo.description}</p>
                 )}
               </div>
 
@@ -190,15 +190,15 @@ export function TodosList() {
                     {todo.project.name}
                   </span>
                 )}
-                <span className={cn(
+                <span className={clsx(
                   'w-2 h-2 rounded-full',
                   statusColors[todo.status]
                 )} />
                 <button
                   onClick={() => openModal(todo)}
-                  className="p-1 hover:bg-muted rounded"
+                  className="p-1 hover:bg-dark-700 rounded"
                 >
-                  <Pencil className="w-4 h-4 text-muted-foreground" />
+                  <PencilIcon className="w-4 h-4 text-dark-400" />
                 </button>
               </div>
             </div>
