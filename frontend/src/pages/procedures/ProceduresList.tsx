@@ -1,19 +1,16 @@
 import { useEffect, useState } from 'react';
-import { apiGet, apiPost, apiPut, getErrorMessage } from '@/services/api';
+import { useNavigate } from 'react-router-dom';
+import { apiGet, getErrorMessage } from '@/services/api';
 import { Procedure, PaginatedResponse } from '@/types';
 import { PlusIcon, MagnifyingGlassIcon, BookOpenIcon, PencilIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import { formatDistanceToNow } from 'date-fns';
-import { Modal } from '@/components/ui/Modal';
-import { ProcedureForm } from '@/components/forms/ProcedureForm';
 
 export function ProceduresList() {
+  const navigate = useNavigate();
   const [procedures, setProcedures] = useState<Procedure[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingProcedure, setEditingProcedure] = useState<Procedure | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     fetchProcedures();
@@ -33,41 +30,6 @@ export function ProceduresList() {
     }
   }
 
-  function openModal(procedure?: Procedure) {
-    setEditingProcedure(procedure || null);
-    setIsModalOpen(true);
-  }
-
-  function closeModal() {
-    setIsModalOpen(false);
-    setEditingProcedure(null);
-  }
-
-  async function handleSubmit(data: {
-    title: string;
-    content: string;
-    isPinned: boolean;
-    categoryId?: string;
-    tagIds: string[];
-  }) {
-    setIsSaving(true);
-    try {
-      if (editingProcedure) {
-        await apiPut(`/procedures/${editingProcedure.id}`, data);
-        toast.success('Note updated successfully');
-      } else {
-        await apiPost('/procedures', data);
-        toast.success('Note created successfully');
-      }
-      closeModal();
-      fetchProcedures();
-    } catch (error) {
-      toast.error(getErrorMessage(error));
-    } finally {
-      setIsSaving(false);
-    }
-  }
-
   // Strip HTML tags for preview
   function stripHtml(html: string): string {
     const tmp = document.createElement('div');
@@ -82,7 +44,7 @@ export function ProceduresList() {
           <h1 className="text-2xl font-bold text-dark-100">Notes</h1>
           <p className="text-dark-400">Rich text notes with categories and tags</p>
         </div>
-        <button onClick={() => openModal()} className="btn-primary">
+        <button onClick={() => navigate('/procedures/new')} className="btn-primary">
           <PlusIcon className="w-5 h-5 mr-2" />
           New Note
         </button>
@@ -113,7 +75,7 @@ export function ProceduresList() {
       ) : (
         <div className="grid md:grid-cols-2 gap-4">
           {procedures.map((proc) => (
-            <div key={proc.id} className="card-hover cursor-pointer group" onClick={() => openModal(proc)}>
+            <div key={proc.id} className="card-hover cursor-pointer group" onClick={() => navigate(`/procedures/${proc.id}`)}>
               <div className="flex items-start gap-4">
                 <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
                   <BookOpenIcon className="w-5 h-5 text-purple-400" />
@@ -122,7 +84,7 @@ export function ProceduresList() {
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-medium text-dark-100 group-hover:text-primary-400">{proc.title}</h3>
                     <button
-                      onClick={(e) => { e.stopPropagation(); openModal(proc); }}
+                      onClick={(e) => { e.stopPropagation(); navigate(`/procedures/${proc.id}`); }}
                       className="p-1 hover:bg-dark-600 rounded opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <PencilIcon className="w-4 h-4 text-dark-400" />
@@ -145,20 +107,6 @@ export function ProceduresList() {
           ))}
         </div>
       )}
-
-      <Modal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        title={editingProcedure ? 'Edit Note' : 'New Note'}
-        size="xl"
-      >
-        <ProcedureForm
-          procedure={editingProcedure || undefined}
-          onSubmit={handleSubmit}
-          onCancel={closeModal}
-          isLoading={isSaving}
-        />
-      </Modal>
     </div>
   );
 }
