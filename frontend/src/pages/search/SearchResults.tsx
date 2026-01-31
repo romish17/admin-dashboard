@@ -3,27 +3,27 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { apiGet, getErrorMessage } from '@/services/api';
 import { SearchResponse, SearchResult } from '@/types';
 import {
-  Code,
-  FileText,
-  ClipboardList,
-  BookOpen,
-  Monitor,
-  Server,
-  Rss,
-  Search,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
+  CodeBracketIcon,
+  DocumentTextIcon,
+  ClipboardDocumentListIcon,
+  BookOpenIcon,
+  ComputerDesktopIcon,
+  ServerIcon,
+  RssIcon,
+  MagnifyingGlassIcon,
+} from '@heroicons/react/24/outline';
+import clsx from 'clsx';
+import toast from 'react-hot-toast';
 import { formatDistanceToNow } from 'date-fns';
 
-const typeConfig: Record<string, { icon: typeof Code; color: string; label: string; path: string }> = {
-  script: { icon: Code, color: 'text-blue-400', label: 'Script', path: '/scripts' },
-  note: { icon: FileText, color: 'text-green-400', label: 'Note', path: '/notes' },
-  todo: { icon: ClipboardList, color: 'text-yellow-400', label: 'Todo', path: '/todos' },
-  procedure: { icon: BookOpen, color: 'text-purple-400', label: 'Procedure', path: '/procedures' },
-  registry: { icon: Monitor, color: 'text-orange-400', label: 'Registry', path: '/registries' },
-  zabbix: { icon: Server, color: 'text-red-400', label: 'Zabbix', path: '/zabbix' },
-  rss: { icon: Rss, color: 'text-cyan-400', label: 'RSS', path: '/rss' },
+const typeConfig: Record<string, { icon: typeof CodeBracketIcon; color: string; label: string; path: string }> = {
+  script: { icon: CodeBracketIcon, color: 'text-blue-400', label: 'Script', path: '/scripts' },
+  note: { icon: DocumentTextIcon, color: 'text-green-400', label: 'Note', path: '/notes' },
+  todo: { icon: ClipboardDocumentListIcon, color: 'text-yellow-400', label: 'Todo', path: '/todos' },
+  procedure: { icon: BookOpenIcon, color: 'text-purple-400', label: 'Procedure', path: '/procedures' },
+  registry: { icon: ComputerDesktopIcon, color: 'text-orange-400', label: 'Registry', path: '/registries' },
+  zabbix: { icon: ServerIcon, color: 'text-red-400', label: 'Zabbix', path: '/zabbix' },
+  rss: { icon: RssIcon, color: 'text-cyan-400', label: 'RSS', path: '/rss' },
 };
 
 export function SearchResults() {
@@ -62,8 +62,8 @@ export function SearchResults() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Search Results</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl font-bold text-dark-100">Search Results</h1>
+        <p className="text-dark-400">
           {results.length} results for "{query}"
         </p>
       </div>
@@ -81,7 +81,7 @@ export function SearchResults() {
           }}
         >
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
             <input
               type="text"
               name="query"
@@ -97,9 +97,9 @@ export function SearchResults() {
       <div className="flex flex-wrap gap-2">
         <button
           onClick={() => setSelectedType('')}
-          className={cn(
+          className={clsx(
             'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
-            !selectedType ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:bg-dark-600'
+            !selectedType ? 'bg-primary-600 text-white' : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
           )}
         >
           All ({results.length})
@@ -111,12 +111,12 @@ export function SearchResults() {
             <button
               key={type}
               onClick={() => setSelectedType(type)}
-              className={cn(
+              className={clsx(
                 'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2',
-                selectedType === type ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:bg-dark-600'
+                selectedType === type ? 'bg-primary-600 text-white' : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
               )}
             >
-              <config.icon className={cn('w-4 h-4', config.color)} />
+              <config.icon className={clsx('w-4 h-4', config.color)} />
               {config.label} ({items.length})
             </button>
           );
@@ -130,8 +130,8 @@ export function SearchResults() {
         </div>
       ) : filteredResults.length === 0 ? (
         <div className="card text-center py-12">
-          <Search className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">No results found. Try a different search term.</p>
+          <MagnifyingGlassIcon className="w-12 h-12 text-dark-600 mx-auto mb-4" />
+          <p className="text-dark-400">No results found. Try a different search term.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -146,25 +146,25 @@ export function SearchResults() {
                 to={`${config.path}/${result.id}`}
                 className="card-hover flex items-start gap-4"
               >
-                <div className={cn('p-2 rounded-lg bg-muted')}>
-                  <Icon className={cn('w-5 h-5', config.color)} />
+                <div className={clsx('p-2 rounded-lg bg-dark-700')}>
+                  <Icon className={clsx('w-5 h-5', config.color)} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-medium text-foreground">{result.title}</h3>
-                    <span className={cn('text-xs px-2 py-0.5 rounded', config.color, 'bg-muted')}>
+                    <h3 className="font-medium text-dark-100">{result.title}</h3>
+                    <span className={clsx('text-xs px-2 py-0.5 rounded', config.color, 'bg-dark-700')}>
                       {config.label}
                     </span>
                   </div>
                   {result.description && (
-                    <p className="text-muted-foreground text-sm mt-1 line-clamp-2">{result.description}</p>
+                    <p className="text-dark-400 text-sm mt-1 line-clamp-2">{result.description}</p>
                   )}
-                  <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-3 mt-2 text-xs text-dark-500">
                     {result.tags.slice(0, 3).map((tag) => (
                       <span key={tag}>#{tag}</span>
                     ))}
                     {result.categories.slice(0, 2).map((cat) => (
-                      <span key={cat} className="text-primary">{cat}</span>
+                      <span key={cat} className="text-primary-400">{cat}</span>
                     ))}
                     <span>{formatDistanceToNow(new Date(result.updatedAt), { addSuffix: true })}</span>
                   </div>

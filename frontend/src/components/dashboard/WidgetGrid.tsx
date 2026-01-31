@@ -1,7 +1,12 @@
 import { useState } from 'react';
-import { Settings, GripVertical, Plus, Eye, EyeOff } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import {
+  Cog6ToothIcon,
+  Bars3Icon,
+  PlusIcon,
+  EyeIcon,
+  EyeSlashIcon,
+} from '@heroicons/react/24/outline';
+import clsx from 'clsx';
 
 export interface WidgetConfig {
   id: string;
@@ -115,46 +120,53 @@ export function WidgetGrid({ widgets, onWidgetsChange, renderWidget, availableWi
       {/* Edit mode toggle */}
       <div className="flex items-center justify-end gap-2">
         {isEditMode && (
-          <Button
-            variant="ghost"
-            size="sm"
+          <button
             onClick={() => setShowAddPanel(!showAddPanel)}
+            className="btn-ghost text-sm"
           >
-            <Plus className="w-4 h-4 mr-1" />
+            <PlusIcon className="w-4 h-4 mr-1" />
             Ajouter un widget
-          </Button>
+          </button>
         )}
-        <Button
-          variant={isEditMode ? "default" : "secondary"}
-          size="sm"
+        <button
           onClick={() => {
             setIsEditMode(!isEditMode);
             setShowAddPanel(false);
           }}
+          className={clsx(
+            'flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors',
+            isEditMode
+              ? 'bg-primary-600 text-white'
+              : 'bg-dark-800 text-dark-400 hover:text-dark-200'
+          )}
         >
-          <Settings className="w-4 h-4 mr-2" />
+          <Cog6ToothIcon className="w-4 h-4" />
           {isEditMode ? 'Terminer' : 'Personnaliser'}
-        </Button>
+        </button>
       </div>
 
       {/* Add widget panel */}
       {showAddPanel && (
-        <div className="p-4 rounded-xl bg-card border border-border">
-          <h3 className="text-sm font-medium text-foreground mb-3">Widgets disponibles</h3>
+        <div className="card bg-dark-800/50 border border-dark-700">
+          <h3 className="text-sm font-medium text-dark-200 mb-3">Widgets disponibles</h3>
           <div className="flex flex-wrap gap-2">
             {availableWidgets.map(widgetDef => {
               const isActive = widgets.some(w => w.type === widgetDef.type && w.visible);
               return (
-                <Button
+                <button
                   key={widgetDef.type}
-                  variant="secondary"
-                  size="sm"
                   onClick={() => addWidget(widgetDef.type)}
                   disabled={isActive}
+                  className={clsx(
+                    'px-3 py-1.5 rounded-lg text-sm transition-colors',
+                    isActive
+                      ? 'bg-dark-700 text-dark-500 cursor-not-allowed'
+                      : 'bg-dark-700 text-dark-300 hover:bg-dark-600 hover:text-dark-100'
+                  )}
                 >
                   {widgetDef.title}
                   {isActive && ' (actif)'}
-                </Button>
+                </button>
               );
             })}
           </div>
@@ -166,7 +178,7 @@ export function WidgetGrid({ widgets, onWidgetsChange, renderWidget, availableWi
         {visibleWidgets.map(widget => (
           <div
             key={widget.id}
-            className={cn(
+            className={clsx(
               getWidgetGridClass(widget.size),
               'relative group',
               isEditMode && 'cursor-move',
@@ -180,23 +192,23 @@ export function WidgetGrid({ widgets, onWidgetsChange, renderWidget, availableWi
           >
             {/* Edit overlay */}
             {isEditMode && (
-              <div className="absolute inset-0 z-10 bg-background/80 backdrop-blur-sm rounded-2xl border-2 border-dashed border-border flex items-start justify-between p-3">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <GripVertical className="w-5 h-5" />
+              <div className="absolute inset-0 z-10 bg-dark-900/50 rounded-2xl border-2 border-dashed border-dark-600 flex items-start justify-between p-3">
+                <div className="flex items-center gap-2 text-dark-400">
+                  <Bars3Icon className="w-5 h-5" />
                   <span className="text-sm font-medium">{widget.title}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   {/* Size buttons */}
-                  <div className="flex bg-muted rounded-lg p-0.5 mr-2">
+                  <div className="flex bg-dark-800 rounded-lg p-0.5 mr-2">
                     {(['sm', 'md', 'lg'] as const).map(size => (
                       <button
                         key={size}
                         onClick={() => changeWidgetSize(widget.id, size)}
-                        className={cn(
+                        className={clsx(
                           'px-2 py-1 text-xs rounded transition-colors',
                           widget.size === size
-                            ? 'bg-primary text-primary-foreground'
-                            : 'text-muted-foreground hover:text-foreground'
+                            ? 'bg-primary-600 text-white'
+                            : 'text-dark-400 hover:text-dark-200'
                         )}
                       >
                         {size.toUpperCase()}
@@ -204,15 +216,13 @@ export function WidgetGrid({ widgets, onWidgetsChange, renderWidget, availableWi
                     ))}
                   </div>
                   {/* Hide button */}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                  <button
                     onClick={() => toggleWidgetVisibility(widget.id)}
+                    className="p-1.5 rounded-lg bg-dark-800 text-dark-400 hover:text-red-400 transition-colors"
                     title="Masquer"
                   >
-                    <EyeOff className="w-4 h-4" />
-                  </Button>
+                    <EyeSlashIcon className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             )}
@@ -224,19 +234,18 @@ export function WidgetGrid({ widgets, onWidgetsChange, renderWidget, availableWi
 
       {/* Hidden widgets (in edit mode) */}
       {isEditMode && hiddenWidgets.length > 0 && (
-        <div className="mt-6 pt-6 border-t border-border">
-          <h3 className="text-sm font-medium text-muted-foreground mb-3">Widgets masqués</h3>
+        <div className="mt-6 pt-6 border-t border-dark-800">
+          <h3 className="text-sm font-medium text-dark-400 mb-3">Widgets masqués</h3>
           <div className="flex flex-wrap gap-2">
             {hiddenWidgets.map(widget => (
-              <Button
+              <button
                 key={widget.id}
-                variant="secondary"
-                size="sm"
                 onClick={() => toggleWidgetVisibility(widget.id)}
+                className="flex items-center gap-2 px-3 py-1.5 bg-dark-800 text-dark-400 hover:text-dark-200 rounded-lg text-sm transition-colors"
               >
-                <Eye className="w-4 h-4 mr-2" />
+                <EyeIcon className="w-4 h-4" />
                 {widget.title}
-              </Button>
+              </button>
             ))}
           </div>
         </div>

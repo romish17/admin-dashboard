@@ -2,15 +2,19 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { apiGet } from '@/services/api';
 import { Todo } from '@/types';
-import { ClipboardList, CheckCircle, Clock, AlertCircle } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import {
+  ClipboardDocumentListIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  ExclamationCircleIcon,
+} from '@heroicons/react/24/outline';
+import clsx from 'clsx';
 
 const priorityConfig = {
-  URGENT: { icon: AlertCircle, color: 'text-red-400', bg: 'bg-red-500/20' },
-  HIGH: { icon: AlertCircle, color: 'text-orange-400', bg: 'bg-orange-500/20' },
-  MEDIUM: { icon: Clock, color: 'text-yellow-400', bg: 'bg-yellow-500/20' },
-  LOW: { icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-500/20' },
+  URGENT: { icon: ExclamationCircleIcon, color: 'text-red-400', bg: 'bg-red-500/20' },
+  HIGH: { icon: ExclamationCircleIcon, color: 'text-orange-400', bg: 'bg-orange-500/20' },
+  MEDIUM: { icon: ClockIcon, color: 'text-yellow-400', bg: 'bg-yellow-500/20' },
+  LOW: { icon: CheckCircleIcon, color: 'text-green-400', bg: 'bg-green-500/20' },
 };
 
 export function TodosWidget() {
@@ -25,50 +29,46 @@ export function TodosWidget() {
   }, []);
 
   return (
-    <Card className="h-full">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <ClipboardList className="w-5 h-5 text-primary" />
-            Tâches prioritaires
-          </CardTitle>
-          <Link to="/todos" className="text-sm text-primary hover:text-primary/80">
-            Voir tout
-          </Link>
+    <div className="card h-full">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-dark-100 flex items-center gap-2">
+          <ClipboardDocumentListIcon className="w-5 h-5 text-primary-400" />
+          Tâches prioritaires
+        </h2>
+        <Link to="/todos" className="text-sm text-primary-400 hover:text-primary-300">
+          Voir tout
+        </Link>
+      </div>
+
+      {isLoading ? (
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin w-6 h-6 border-2 border-primary-500 border-t-transparent rounded-full" />
         </div>
-      </CardHeader>
-      <CardContent>
-        {isLoading ? (
-          <div className="flex items-center justify-center py-8">
-            <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
-          </div>
-        ) : todos.length === 0 ? (
-          <p className="text-muted-foreground text-sm">Aucune tâche prioritaire. Tout est à jour !</p>
-        ) : (
-          <div className="space-y-2">
-            {todos.slice(0, 6).map((todo) => {
-              const config = priorityConfig[todo.priority];
-              const Icon = config.icon;
-              return (
-                <div
-                  key={todo.id}
-                  className="flex items-start gap-3 p-2 rounded-lg hover:bg-muted transition-colors"
-                >
-                  <div className={cn('p-1.5 rounded-lg flex-shrink-0', config.bg)}>
-                    <Icon className={cn('w-4 h-4', config.color)} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-foreground truncate">{todo.title}</p>
-                    {todo.project && (
-                      <p className="text-xs text-muted-foreground">{todo.project.name}</p>
-                    )}
-                  </div>
+      ) : todos.length === 0 ? (
+        <p className="text-dark-400 text-sm">Aucune tâche prioritaire. Tout est à jour !</p>
+      ) : (
+        <div className="space-y-2">
+          {todos.slice(0, 6).map((todo) => {
+            const config = priorityConfig[todo.priority];
+            return (
+              <div
+                key={todo.id}
+                className="flex items-start gap-3 p-2 rounded-lg hover:bg-dark-700/50 transition-colors"
+              >
+                <div className={clsx('p-1.5 rounded-lg flex-shrink-0', config.bg)}>
+                  <config.icon className={clsx('w-4 h-4', config.color)} />
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-dark-200 truncate">{todo.title}</p>
+                  {todo.project && (
+                    <p className="text-xs text-dark-500">{todo.project.name}</p>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }
