@@ -58,8 +58,8 @@ export function ZabbixForm({ item, onSubmit, onCancel, isLoading }: ZabbixFormPr
   async function fetchCategoriesAndTags() {
     try {
       const [cats, tgs] = await Promise.all([
-        apiGet<Category[]>('/categories'),
-        apiGet<Tag[]>('/tags'),
+        apiGet<Category[]>('/categories?section=ZABBIX'),
+        apiGet<Tag[]>('/tags?section=ZABBIX'),
       ]);
       setCategories(cats);
       setTags(tgs);

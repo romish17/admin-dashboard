@@ -56,8 +56,8 @@ export function ScriptForm({ script, onSubmit, onCancel, isLoading }: ScriptForm
   async function fetchOptions() {
     try {
       const [cats, tgs] = await Promise.all([
-        apiGet<Category[]>('/categories'),
-        apiGet<Tag[]>('/tags'),
+        apiGet<Category[]>('/categories?section=SCRIPTS'),
+        apiGet<Tag[]>('/tags?section=SCRIPTS'),
       ]);
       setCategories(cats);
       setTags(tgs);

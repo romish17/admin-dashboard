@@ -7,6 +7,7 @@ export const createCategorySchema = z.object({
   description: z.string().max(200).optional(),
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).default('#3B82F6'),
   icon: z.string().max(50).optional(),
+  section: z.enum(['SCRIPTS', 'REGISTRIES', 'ZABBIX', 'NOTES', 'PROCEDURES', 'TODOS', 'RSS']).optional().nullable(),
 });
 
 export const updateCategorySchema = createCategorySchema.partial();
@@ -23,9 +24,19 @@ function slugify(text: string): string {
 }
 
 class CategoriesService {
-  async findAll(userId: string) {
+  async findAll(userId: string, section?: string) {
+    const where: Record<string, unknown> = { userId };
+
+    // If section is specified, include categories for that section AND global categories (null section)
+    if (section) {
+      where.OR = [
+        { section: section },
+        { section: null },
+      ];
+    }
+
     const categories = await prisma.category.findMany({
-      where: { userId },
+      where,
       orderBy: { name: 'asc' },
       include: {
         _count: {
@@ -58,33 +69,39 @@ class CategoriesService {
 
   async create(userId: string, data: CreateCategoryInput) {
     const slug = slugify(data.name);
+    const section = data.section || null;
 
-    // Check for duplicate slug
+    // Check for duplicate slug within same section
     const existing = await prisma.category.findFirst({
-      where: { userId, slug },
+      where: { userId, slug, section },
     });
     if (existing) {
-      throw new ConflictError('A category with this name already exists');
+      throw new ConflictError('A category with this name already exists in this section');
     }
 
     return prisma.category.create({
-      data: { ...data, slug, userId },
+      data: { ...data, slug, section, userId },
     });
   }
 
   async update(id: string, userId: string, data: UpdateCategoryInput) {
-    await this.findById(id, userId);
+    const current = await this.findById(id, userId);
 
     const updateData: Record<string, unknown> = { ...data };
-    if (data.name) {
-      updateData.slug = slugify(data.name);
+    const section = data.section !== undefined ? data.section : current.section;
 
-      // Check for duplicate slug (excluding current)
+    if (data.name || data.section !== undefined) {
+      const slug = data.name ? slugify(data.name) : current.slug;
+      if (data.name) {
+        updateData.slug = slug;
+      }
+
+      // Check for duplicate slug within same section (excluding current)
       const existing = await prisma.category.findFirst({
-        where: { userId, slug: updateData.slug as string, NOT: { id } },
+        where: { userId, slug, section, NOT: { id } },
       });
       if (existing) {
-        throw new ConflictError('A category with this name already exists');
+        throw new ConflictError('A category with this name already exists in this section');
       }
     }
 
