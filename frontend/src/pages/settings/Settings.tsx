@@ -16,6 +16,17 @@ const tabs = [
   { id: 'tags', name: 'Tags', icon: TagIcon },
 ];
 
+const sections = [
+  { id: '', name: 'Global (all sections)' },
+  { id: 'SCRIPTS', name: 'Scripts' },
+  { id: 'REGISTRIES', name: 'Registries' },
+  { id: 'ZABBIX', name: 'Zabbix' },
+  { id: 'NOTES', name: 'Notes' },
+  { id: 'PROCEDURES', name: 'Procedures' },
+  { id: 'TODOS', name: 'Tasks' },
+  { id: 'RSS', name: 'RSS' },
+];
+
 export function Settings() {
   const { user, setUser } = useAuthStore();
   const [activeTab, setActiveTab] = useState('profile');
@@ -37,12 +48,14 @@ export function Settings() {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [isCategorySaving, setIsCategorySaving] = useState(false);
+  const [categorySection, setCategorySection] = useState('');
 
   // Tags state
   const [tags, setTags] = useState<Tag[]>([]);
   const [isTagModalOpen, setIsTagModalOpen] = useState(false);
   const [editingTag, setEditingTag] = useState<Tag | null>(null);
   const [isTagSaving, setIsTagSaving] = useState(false);
+  const [tagSection, setTagSection] = useState('');
 
   useEffect(() => {
     if (activeTab === 'categories') {
@@ -50,11 +63,12 @@ export function Settings() {
     } else if (activeTab === 'tags') {
       fetchTags();
     }
-  }, [activeTab]);
+  }, [activeTab, categorySection, tagSection]);
 
   async function fetchCategories() {
     try {
-      const data = await apiGet<Category[]>('/categories');
+      const params = categorySection ? `?section=${categorySection}` : '';
+      const data = await apiGet<Category[]>(`/categories${params}`);
       setCategories(data);
     } catch (error) {
       toast.error(getErrorMessage(error));
@@ -63,7 +77,8 @@ export function Settings() {
 
   async function fetchTags() {
     try {
-      const data = await apiGet<Tag[]>('/tags');
+      const params = tagSection ? `?section=${tagSection}` : '';
+      const data = await apiGet<Tag[]>(`/tags${params}`);
       setTags(data);
     } catch (error) {
       toast.error(getErrorMessage(error));
@@ -119,11 +134,15 @@ export function Settings() {
   async function handleCategorySubmit(data: { name: string; description?: string; color: string; icon?: string }) {
     setIsCategorySaving(true);
     try {
+      const submitData = {
+        ...data,
+        section: categorySection || null,
+      };
       if (editingCategory) {
-        await apiPut(`/categories/${editingCategory.id}`, data);
+        await apiPut(`/categories/${editingCategory.id}`, submitData);
         toast.success('Category updated');
       } else {
-        await apiPost('/categories', data);
+        await apiPost('/categories', submitData);
         toast.success('Category created');
       }
       closeCategoryModal();
@@ -160,11 +179,15 @@ export function Settings() {
   async function handleTagSubmit(data: { name: string; color: string }) {
     setIsTagSaving(true);
     try {
+      const submitData = {
+        ...data,
+        section: tagSection || null,
+      };
       if (editingTag) {
-        await apiPut(`/tags/${editingTag.id}`, data);
+        await apiPut(`/tags/${editingTag.id}`, submitData);
         toast.success('Tag updated');
       } else {
-        await apiPost('/tags', data);
+        await apiPost('/tags', submitData);
         toast.success('Tag created');
       }
       closeTagModal();
@@ -308,8 +331,27 @@ export function Settings() {
                 </button>
               </div>
 
+              {/* Section filter */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-dark-300 mb-2">Filter by Section</label>
+                <select
+                  value={categorySection}
+                  onChange={(e) => setCategorySection(e.target.value)}
+                  className="input w-full md:w-64"
+                >
+                  {sections.map((s) => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+                <p className="text-dark-500 text-xs mt-1">
+                  {categorySection
+                    ? `Creating categories for ${sections.find(s => s.id === categorySection)?.name}`
+                    : 'Global categories are visible in all sections'}
+                </p>
+              </div>
+
               {categories.length === 0 ? (
-                <p className="text-dark-400 text-center py-8">No categories yet. Create your first one!</p>
+                <p className="text-dark-400 text-center py-8">No categories found for this section. Create your first one!</p>
               ) : (
                 <div className="space-y-2">
                   {categories.map((category) => (
@@ -360,8 +402,27 @@ export function Settings() {
                 </button>
               </div>
 
+              {/* Section filter */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-dark-300 mb-2">Filter by Section</label>
+                <select
+                  value={tagSection}
+                  onChange={(e) => setTagSection(e.target.value)}
+                  className="input w-full md:w-64"
+                >
+                  {sections.map((s) => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+                <p className="text-dark-500 text-xs mt-1">
+                  {tagSection
+                    ? `Creating tags for ${sections.find(s => s.id === tagSection)?.name}`
+                    : 'Global tags are visible in all sections'}
+                </p>
+              </div>
+
               {tags.length === 0 ? (
-                <p className="text-dark-400 text-center py-8">No tags yet. Create your first one!</p>
+                <p className="text-dark-400 text-center py-8">No tags found for this section. Create your first one!</p>
               ) : (
                 <div className="flex flex-wrap gap-2">
                   {tags.map((tag) => (

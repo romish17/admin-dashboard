@@ -39,7 +39,7 @@ export function TodoForm({ todo, onSubmit, onCancel, isLoading }: TodoFormProps)
   const [categories, setCategories] = useState<Category[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
-  const [selectedTags, setSelectedTags] = useState<string[]>(todo?.tags.map(t => t.id) || []);
+  const [selectedTags, setSelectedTags] = useState<string[]>(todo?.tags?.map(t => t.id) || []);
 
   const {
     register,

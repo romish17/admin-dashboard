@@ -17,6 +17,7 @@ import { ProjectsList } from '@/pages/projects/ProjectsList';
 import { ProjectDetail } from '@/pages/projects/ProjectDetail';
 import { RegistriesList } from '@/pages/registries/RegistriesList';
 import { ProceduresList } from '@/pages/procedures/ProceduresList';
+import { ProcedureEdit } from '@/pages/procedures/ProcedureEdit';
 import { ZabbixList } from '@/pages/zabbix/ZabbixList';
 import { RssFeedsList } from '@/pages/rss/RssFeedsList';
 import { FavoritesList } from '@/pages/favorites/FavoritesList';
@@ -96,8 +97,10 @@ export default function App() {
         {/* Registries */}
         <Route path="registries" element={<RegistriesList />} />
 
-        {/* Procedures */}
+        {/* Procedures (Notes) */}
         <Route path="procedures" element={<ProceduresList />} />
+        <Route path="procedures/new" element={<ProcedureEdit />} />
+        <Route path="procedures/:id" element={<ProcedureEdit />} />
 
         {/* Zabbix */}
         <Route path="zabbix" element={<ZabbixList />} />
