@@ -12,9 +12,9 @@ import { Register } from '@/pages/auth/Register';
 import { ScriptsList } from '@/pages/scripts/ScriptsList';
 import { ScriptDetail } from '@/pages/scripts/ScriptDetail';
 import { ScriptEdit } from '@/pages/scripts/ScriptEdit';
-import { NotesList } from '@/pages/notes/NotesList';
 import { TodosList } from '@/pages/todos/TodosList';
 import { ProjectsList } from '@/pages/projects/ProjectsList';
+import { ProjectDetail } from '@/pages/projects/ProjectDetail';
 import { RegistriesList } from '@/pages/registries/RegistriesList';
 import { ProceduresList } from '@/pages/procedures/ProceduresList';
 import { ZabbixList } from '@/pages/zabbix/ZabbixList';
@@ -86,14 +86,12 @@ export default function App() {
         <Route path="scripts/:id" element={<ScriptDetail />} />
         <Route path="scripts/:id/edit" element={<ScriptEdit />} />
 
-        {/* Notes */}
-        <Route path="notes" element={<NotesList />} />
-
         {/* Todos */}
         <Route path="todos" element={<TodosList />} />
 
         {/* Projects */}
         <Route path="projects" element={<ProjectsList />} />
+        <Route path="projects/:id" element={<ProjectDetail />} />
 
         {/* Registries */}
         <Route path="registries" element={<RegistriesList />} />

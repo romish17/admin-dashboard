@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { apiGet, apiPost, apiPut, apiDelete, getErrorMessage } from '@/services/api';
 import { Project } from '@/types';
-import { PlusIcon, PencilIcon, TrashIcon, FolderIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, PencilIcon, TrashIcon, FolderIcon, ViewColumnsIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import toast from 'react-hot-toast';
 import { Modal } from '@/components/ui/Modal';
 import { ProjectForm } from '@/components/forms/ProjectForm';
 
 export function ProjectsList() {
+  const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -64,7 +66,8 @@ export function ProjectsList() {
     }
   }
 
-  async function deleteProject(id: string) {
+  async function deleteProject(id: string, e: React.MouseEvent) {
+    e.stopPropagation();
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce projet ?')) return;
     try {
       await apiDelete(`/todos/projects/${id}`);
@@ -112,7 +115,8 @@ export function ProjectsList() {
           {projects.map((project) => (
             <div
               key={project.id}
-              className="card-hover group"
+              onClick={() => navigate(`/projects/${project.id}`)}
+              className="card-hover group cursor-pointer"
             >
               <div className="flex items-start gap-4">
                 <div
@@ -124,21 +128,23 @@ export function ProjectsList() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="font-medium text-dark-100">{project.name}</h3>
+                      <h3 className="font-medium text-dark-100 group-hover:text-primary-400 transition-colors">{project.name}</h3>
                       {project.description && (
                         <p className="text-dark-400 text-sm mt-1 line-clamp-2">{project.description}</p>
                       )}
                     </div>
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
-                        onClick={() => openModal(project)}
+                        onClick={(e) => { e.stopPropagation(); openModal(project); }}
                         className="p-1.5 hover:bg-dark-700 rounded-lg"
+                        title="Modifier"
                       >
                         <PencilIcon className="w-4 h-4 text-dark-400" />
                       </button>
                       <button
-                        onClick={() => deleteProject(project.id)}
+                        onClick={(e) => deleteProject(project.id, e)}
                         className="p-1.5 hover:bg-red-500/20 rounded-lg"
+                        title="Supprimer"
                       >
                         <TrashIcon className="w-4 h-4 text-red-400" />
                       </button>
@@ -153,6 +159,10 @@ export function ProjectsList() {
                         {project.stats.total || 0} tâches
                       </span>
                     )}
+                  </div>
+                  <div className="flex items-center gap-2 mt-3 text-xs text-primary-400">
+                    <ViewColumnsIcon className="w-4 h-4" />
+                    <span>Voir le Kanban</span>
                   </div>
                 </div>
               </div>
