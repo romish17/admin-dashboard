@@ -1,5 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { Category } from '@/types';
+import { cn } from '@/lib/utils';
 
 interface CategoryFormData {
   name: string;
@@ -52,7 +53,7 @@ export function CategoryForm({ category, onSubmit, onCancel, isLoading }: Catego
           className="input"
           placeholder="Category name"
         />
-        {errors.name && <p className="text-red-400 text-sm mt-1">{errors.name.message}</p>}
+        {errors.name && <p className="text-destructive text-sm mt-1">{errors.name.message}</p>}
       </div>
 
       <div>
@@ -73,9 +74,10 @@ export function CategoryForm({ category, onSubmit, onCancel, isLoading }: Catego
               key={color}
               type="button"
               onClick={() => setValue('color', color)}
-              className={`w-8 h-8 rounded-lg transition-transform ${
-                selectedColor === color ? 'ring-2 ring-white ring-offset-2 ring-offset-dark-800 scale-110' : ''
-              }`}
+              className={cn(
+                'w-8 h-8 rounded-lg transition-transform',
+                selectedColor === color && 'ring-2 ring-white ring-offset-2 ring-offset-background scale-110'
+              )}
               style={{ backgroundColor: color }}
             />
           ))}
@@ -91,11 +93,12 @@ export function CategoryForm({ category, onSubmit, onCancel, isLoading }: Catego
               key={icon}
               type="button"
               onClick={() => setValue('icon', icon)}
-              className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
+              className={cn(
+                'px-3 py-1.5 rounded-lg text-sm transition-colors',
                 selectedIcon === icon
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
-              }`}
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+              )}
             >
               {icon}
             </button>

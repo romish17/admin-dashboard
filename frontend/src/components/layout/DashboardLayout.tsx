@@ -126,43 +126,58 @@ export function DashboardLayout() {
             ))}
           </nav>
 
-          {/* Settings & Collapse button */}
-          <div className={clsx(
-            'p-4 border-t border-dark-800 space-y-2',
+          {/* Settings */}
+          <div className={cn(
+            'p-4 border-t border-sidebar-border',
             sidebarCollapsed && 'px-2'
           )}>
-            <NavLink
-              to="/settings"
-              className={({ isActive }) => clsx(
-                isActive ? 'sidebar-link-active' : 'sidebar-link',
-                sidebarCollapsed && 'justify-center px-0'
-              )}
-              title={sidebarCollapsed ? 'Paramètres' : undefined}
-            >
-              <Cog6ToothIcon className="w-5 h-5 flex-shrink-0" />
-              {!sidebarCollapsed && <span>Paramètres</span>}
-            </NavLink>
-
-            {/* Collapse toggle - desktop only */}
-            <button
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className={clsx(
-                'hidden lg:flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-dark-400 hover:text-dark-100 hover:bg-dark-800 transition-colors',
-                sidebarCollapsed && 'justify-center px-0'
-              )}
-              title={sidebarCollapsed ? 'Agrandir le menu' : 'Réduire le menu'}
-            >
-              {sidebarCollapsed ? (
-                <ChevronRightIcon className="w-5 h-5" />
-              ) : (
-                <>
-                  <ChevronLeftIcon className="w-5 h-5" />
-                  <span>Réduire</span>
-                </>
-              )}
-            </button>
+            {sidebarCollapsed ? (
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <NavLink
+                    to="/settings"
+                    className={({ isActive }) => cn(
+                      isActive ? 'sidebar-link-active' : 'sidebar-link',
+                      'justify-center px-0'
+                    )}
+                  >
+                    <Settings className="w-5 h-5 flex-shrink-0" />
+                  </NavLink>
+                </TooltipTrigger>
+                <TooltipContent side="right">Paramètres</TooltipContent>
+              </Tooltip>
+            ) : (
+              <NavLink
+                to="/settings"
+                className={({ isActive }) => cn(
+                  isActive ? 'sidebar-link-active' : 'sidebar-link'
+                )}
+              >
+                <Settings className="w-5 h-5 flex-shrink-0" />
+                <span>Paramètres</span>
+              </NavLink>
+            )}
           </div>
         </div>
+
+        {/* Collapse toggle - positioned at sidebar edge */}
+        <Tooltip delayDuration={0}>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className="hidden lg:flex absolute -right-3 top-20 w-6 h-6 bg-card border border-border rounded-full items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors shadow-sm"
+            >
+              {sidebarCollapsed ? (
+                <ChevronRight className="w-3 h-3" />
+              ) : (
+                <ChevronLeft className="w-3 h-3" />
+              )}
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="right">
+            {sidebarCollapsed ? 'Agrandir' : 'Réduire'}
+          </TooltipContent>
+        </Tooltip>
       </aside>
 
       {/* Main content */}
