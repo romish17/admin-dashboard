@@ -45,26 +45,19 @@ export function ProceduresList() {
 
   async function handleSubmit(data: {
     title: string;
-    description?: string;
-    version: string;
+    content: string;
     isPinned: boolean;
     categoryId?: string;
     tagIds: string[];
-    steps: {
-      stepNumber: number;
-      title: string;
-      content: string;
-      isOptional: boolean;
-    }[];
   }) {
     setIsSaving(true);
     try {
       if (editingProcedure) {
         await apiPut(`/procedures/${editingProcedure.id}`, data);
-        toast.success('Procedure updated successfully');
+        toast.success('Note updated successfully');
       } else {
         await apiPost('/procedures', data);
-        toast.success('Procedure created successfully');
+        toast.success('Note created successfully');
       }
       closeModal();
       fetchProcedures();
@@ -75,16 +68,23 @@ export function ProceduresList() {
     }
   }
 
+  // Strip HTML tags for preview
+  function stripHtml(html: string): string {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '';
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-dark-100">Procedures</h1>
-          <p className="text-dark-400">Step-by-step documentation and guides</p>
+          <h1 className="text-2xl font-bold text-dark-100">Notes</h1>
+          <p className="text-dark-400">Rich text notes with categories and tags</p>
         </div>
         <button onClick={() => openModal()} className="btn-primary">
           <PlusIcon className="w-5 h-5 mr-2" />
-          New Procedure
+          New Note
         </button>
       </div>
 
@@ -93,7 +93,7 @@ export function ProceduresList() {
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
           <input
             type="text"
-            placeholder="Search procedures..."
+            placeholder="Search notes..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="input pl-10"
@@ -108,7 +108,7 @@ export function ProceduresList() {
       ) : procedures.length === 0 ? (
         <div className="card text-center py-12">
           <BookOpenIcon className="w-12 h-12 text-dark-600 mx-auto mb-4" />
-          <p className="text-dark-400">No procedures found. Create your first procedure!</p>
+          <p className="text-dark-400">No notes found. Create your first note!</p>
         </div>
       ) : (
         <div className="grid md:grid-cols-2 gap-4">
@@ -128,12 +128,15 @@ export function ProceduresList() {
                       <PencilIcon className="w-4 h-4 text-dark-400" />
                     </button>
                   </div>
-                  {proc.description && (
-                    <p className="text-dark-400 text-sm mt-1 line-clamp-2">{proc.description}</p>
+                  {proc.content && (
+                    <p className="text-dark-400 text-sm mt-1 line-clamp-2">{stripHtml(proc.content)}</p>
                   )}
                   <div className="flex items-center gap-3 mt-3 text-xs text-dark-500">
-                    <span>{proc.steps?.length || 0} steps</span>
-                    <span>v{proc.version}</span>
+                    {proc.category && (
+                      <span className="px-2 py-0.5 rounded-full" style={{ backgroundColor: proc.category.color + '20', color: proc.category.color }}>
+                        {proc.category.name}
+                      </span>
+                    )}
                     <span>{formatDistanceToNow(new Date(proc.updatedAt), { addSuffix: true })}</span>
                   </div>
                 </div>
@@ -146,7 +149,7 @@ export function ProceduresList() {
       <Modal
         isOpen={isModalOpen}
         onClose={closeModal}
-        title={editingProcedure ? 'Edit Procedure' : 'New Procedure'}
+        title={editingProcedure ? 'Edit Note' : 'New Note'}
         size="xl"
       >
         <ProcedureForm

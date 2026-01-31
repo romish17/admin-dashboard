@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { Tag } from '@/types';
-import { cn } from '@/lib/utils';
+import clsx from 'clsx';
 
 interface TagFormData {
   name: string;
@@ -41,7 +41,7 @@ export function TagForm({ tag, onSubmit, onCancel, isLoading }: TagFormProps) {
           className="input"
           placeholder="Tag name"
         />
-        {errors.name && <p className="text-destructive text-sm mt-1">{errors.name.message}</p>}
+        {errors.name && <p className="text-red-400 text-sm mt-1">{errors.name.message}</p>}
       </div>
 
       <div>
@@ -52,9 +52,9 @@ export function TagForm({ tag, onSubmit, onCancel, isLoading }: TagFormProps) {
               key={color}
               type="button"
               onClick={() => setValue('color', color)}
-              className={cn(
+              className={clsx(
                 'w-8 h-8 rounded-lg transition-transform',
-                selectedColor === color && 'ring-2 ring-white ring-offset-2 ring-offset-background scale-110'
+                selectedColor === color && 'ring-2 ring-white ring-offset-2 ring-offset-dark-900 scale-110'
               )}
               style={{ backgroundColor: color }}
             />
@@ -63,8 +63,8 @@ export function TagForm({ tag, onSubmit, onCancel, isLoading }: TagFormProps) {
         <input type="hidden" {...register('color', { required: true })} />
       </div>
 
-      <div className="mt-4 p-3 bg-muted/50 rounded-lg">
-        <p className="text-sm text-muted-foreground">Preview:</p>
+      <div className="mt-4 p-3 bg-dark-700/50 rounded-lg">
+        <p className="text-sm text-dark-400">Preview:</p>
         <span
           className="inline-block mt-2 px-3 py-1 rounded-full text-sm text-white"
           style={{ backgroundColor: selectedColor }}
