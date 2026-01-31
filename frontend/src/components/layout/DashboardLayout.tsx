@@ -127,57 +127,36 @@ export function DashboardLayout() {
           </nav>
 
           {/* Settings */}
-          <div className={cn(
-            'p-4 border-t border-sidebar-border',
+          <div className={clsx(
+            'p-4 border-t border-dark-800',
             sidebarCollapsed && 'px-2'
           )}>
-            {sidebarCollapsed ? (
-              <Tooltip delayDuration={0}>
-                <TooltipTrigger asChild>
-                  <NavLink
-                    to="/settings"
-                    className={({ isActive }) => cn(
-                      isActive ? 'sidebar-link-active' : 'sidebar-link',
-                      'justify-center px-0'
-                    )}
-                  >
-                    <Settings className="w-5 h-5 flex-shrink-0" />
-                  </NavLink>
-                </TooltipTrigger>
-                <TooltipContent side="right">Paramètres</TooltipContent>
-              </Tooltip>
-            ) : (
-              <NavLink
-                to="/settings"
-                className={({ isActive }) => cn(
-                  isActive ? 'sidebar-link-active' : 'sidebar-link'
-                )}
-              >
-                <Settings className="w-5 h-5 flex-shrink-0" />
-                <span>Paramètres</span>
-              </NavLink>
-            )}
+            <NavLink
+              to="/settings"
+              className={({ isActive }) => clsx(
+                isActive ? 'sidebar-link-active' : 'sidebar-link',
+                sidebarCollapsed && 'justify-center px-0'
+              )}
+              title={sidebarCollapsed ? 'Paramètres' : undefined}
+            >
+              <Cog6ToothIcon className="w-5 h-5 flex-shrink-0" />
+              {!sidebarCollapsed && <span>Paramètres</span>}
+            </NavLink>
           </div>
         </div>
 
         {/* Collapse toggle - positioned at sidebar edge */}
-        <Tooltip delayDuration={0}>
-          <TooltipTrigger asChild>
-            <button
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="hidden lg:flex absolute -right-3 top-20 w-6 h-6 bg-card border border-border rounded-full items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors shadow-sm"
-            >
-              {sidebarCollapsed ? (
-                <ChevronRight className="w-3 h-3" />
-              ) : (
-                <ChevronLeft className="w-3 h-3" />
-              )}
-            </button>
-          </TooltipTrigger>
-          <TooltipContent side="right">
-            {sidebarCollapsed ? 'Agrandir' : 'Réduire'}
-          </TooltipContent>
-        </Tooltip>
+        <button
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          className="hidden lg:flex absolute -right-3 top-20 w-6 h-6 bg-dark-800 border border-dark-700 rounded-full items-center justify-center text-dark-400 hover:text-dark-200 hover:bg-dark-700 transition-colors shadow-sm"
+          title={sidebarCollapsed ? 'Agrandir' : 'Réduire'}
+        >
+          {sidebarCollapsed ? (
+            <ChevronRightIcon className="w-3 h-3" />
+          ) : (
+            <ChevronLeftIcon className="w-3 h-3" />
+          )}
+        </button>
       </aside>
 
       {/* Main content */}
