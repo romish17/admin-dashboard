@@ -58,9 +58,10 @@ async function main() {
     const slug = slugify(cat.name);
     await prisma.category.upsert({
       where: {
-        userId_slug: {
+        userId_slug_section: {
           userId: adminUser.id,
           slug: slug,
+          section: null,
         },
       },
       update: {},
@@ -71,6 +72,7 @@ async function main() {
         description: cat.description,
         icon: cat.icon,
         userId: adminUser.id,
+        section: null,
       },
     });
   }
@@ -109,9 +111,10 @@ async function main() {
     const slug = slugify(tag.name);
     await prisma.tag.upsert({
       where: {
-        userId_slug: {
+        userId_slug_section: {
           userId: adminUser.id,
           slug: slug,
+          section: null,
         },
       },
       update: {},
@@ -120,6 +123,7 @@ async function main() {
         slug: slug,
         color: tag.color,
         userId: adminUser.id,
+        section: null,
       },
     });
   }
