@@ -56,25 +56,27 @@ async function main() {
 
   for (const cat of defaultCategories) {
     const slug = slugify(cat.name);
-    await prisma.category.upsert({
+    // Check if category already exists (for global categories with null section)
+    const existing = await prisma.category.findFirst({
       where: {
-        userId_slug_section: {
-          userId: adminUser.id,
-          slug: slug,
-          section: null,
-        },
-      },
-      update: {},
-      create: {
-        name: cat.name,
-        slug: slug,
-        color: cat.color,
-        description: cat.description,
-        icon: cat.icon,
         userId: adminUser.id,
+        slug: slug,
         section: null,
       },
     });
+    if (!existing) {
+      await prisma.category.create({
+        data: {
+          name: cat.name,
+          slug: slug,
+          color: cat.color,
+          description: cat.description,
+          icon: cat.icon,
+          userId: adminUser.id,
+          section: null,
+        },
+      });
+    }
   }
   console.log('✅ Default categories created');
 
@@ -109,23 +111,25 @@ async function main() {
 
   for (const tag of defaultTags) {
     const slug = slugify(tag.name);
-    await prisma.tag.upsert({
+    // Check if tag already exists (for global tags with null section)
+    const existing = await prisma.tag.findFirst({
       where: {
-        userId_slug_section: {
-          userId: adminUser.id,
-          slug: slug,
-          section: null,
-        },
-      },
-      update: {},
-      create: {
-        name: tag.name,
-        slug: slug,
-        color: tag.color,
         userId: adminUser.id,
+        slug: slug,
         section: null,
       },
     });
+    if (!existing) {
+      await prisma.tag.create({
+        data: {
+          name: tag.name,
+          slug: slug,
+          color: tag.color,
+          userId: adminUser.id,
+          section: null,
+        },
+      });
+    }
   }
   console.log('✅ Default tags created');
 
