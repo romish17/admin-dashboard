@@ -55,7 +55,7 @@ export function RssFeedForm({ feed, onSubmit, onCancel, isLoading }: RssFeedForm
 
   async function fetchCategories() {
     try {
-      const cats = await apiGet<Category[]>('/categories');
+      const cats = await apiGet<Category[]>('/categories?section=RSS');
       setCategories(cats);
     } catch (error) {
       toast.error(getErrorMessage(error));

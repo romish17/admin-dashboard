@@ -10,7 +10,8 @@ router.use(authenticate);
 router.get('/', authorize('categories', 'read'),
   async (req: AuthenticatedRequest, res: Response, next) => {
     try {
-      const categories = await categoriesService.findAll(req.user!.userId);
+      const section = req.query.section as string | undefined;
+      const categories = await categoriesService.findAll(req.user!.userId, section);
       res.json({ success: true, data: categories });
     } catch (error) { next(error); }
   }

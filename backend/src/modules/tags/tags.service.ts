@@ -5,6 +5,7 @@ import { z } from 'zod';
 export const createTagSchema = z.object({
   name: z.string().min(1).max(30),
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).default('#6B7280'),
+  section: z.enum(['SCRIPTS', 'REGISTRIES', 'ZABBIX', 'NOTES', 'PROCEDURES', 'TODOS', 'RSS']).optional().nullable(),
 });
 
 export const updateTagSchema = createTagSchema.partial();
@@ -21,9 +22,19 @@ function slugify(text: string): string {
 }
 
 class TagsService {
-  async findAll(userId: string) {
+  async findAll(userId: string, section?: string) {
+    const where: Record<string, unknown> = { userId };
+
+    // If section is specified, include tags for that section AND global tags (null section)
+    if (section) {
+      where.OR = [
+        { section: section },
+        { section: null },
+      ];
+    }
+
     const tags = await prisma.tag.findMany({
-      where: { userId },
+      where,
       orderBy: { name: 'asc' },
       include: {
         _count: {
@@ -53,27 +64,33 @@ class TagsService {
 
   async create(userId: string, data: CreateTagInput) {
     const slug = slugify(data.name);
+    const section = data.section || null;
 
-    const existing = await prisma.tag.findFirst({ where: { userId, slug } });
+    const existing = await prisma.tag.findFirst({ where: { userId, slug, section } });
     if (existing) {
-      throw new ConflictError('A tag with this name already exists');
+      throw new ConflictError('A tag with this name already exists in this section');
     }
 
-    return prisma.tag.create({ data: { ...data, slug, userId } });
+    return prisma.tag.create({ data: { ...data, slug, section, userId } });
   }
 
   async update(id: string, userId: string, data: UpdateTagInput) {
-    await this.findById(id, userId);
+    const current = await this.findById(id, userId);
 
     const updateData: Record<string, unknown> = { ...data };
-    if (data.name) {
-      updateData.slug = slugify(data.name);
+    const section = data.section !== undefined ? data.section : current.section;
+
+    if (data.name || data.section !== undefined) {
+      const slug = data.name ? slugify(data.name) : current.slug;
+      if (data.name) {
+        updateData.slug = slug;
+      }
 
       const existing = await prisma.tag.findFirst({
-        where: { userId, slug: updateData.slug as string, NOT: { id } },
+        where: { userId, slug, section, NOT: { id } },
       });
       if (existing) {
-        throw new ConflictError('A tag with this name already exists');
+        throw new ConflictError('A tag with this name already exists in this section');
       }
     }
 

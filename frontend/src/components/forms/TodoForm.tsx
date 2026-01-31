@@ -64,8 +64,8 @@ export function TodoForm({ todo, onSubmit, onCancel, isLoading }: TodoFormProps)
   async function fetchOptions() {
     try {
       const [cats, tgs, projs] = await Promise.all([
-        apiGet<Category[]>('/categories').catch(() => []),
-        apiGet<Tag[]>('/tags').catch(() => []),
+        apiGet<Category[]>('/categories?section=TODOS').catch(() => []),
+        apiGet<Tag[]>('/tags?section=TODOS').catch(() => []),
         apiGet<Project[]>('/todos/projects').catch(() => []),
       ]);
       setCategories(cats);

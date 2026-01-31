@@ -3,22 +3,13 @@ import { NotFoundError } from '../../middleware/errorHandler.js';
 import { PaginationParams, paginatedResponse, getPrismaSkipTake } from '../../utils/pagination.js';
 import { z } from 'zod';
 
-export const procedureStepSchema = z.object({
-  stepNumber: z.number().int().min(1),
-  title: z.string().min(1).max(200),
-  content: z.string().min(1),
-  isOptional: z.boolean().default(false),
-});
-
 export const createProcedureSchema = z.object({
   title: z.string().min(1).max(200),
-  description: z.string().max(1000).optional().or(z.literal('')).transform(v => v || undefined),
-  version: z.string().max(20).default('1.0'),
+  content: z.string().min(1), // Rich HTML content from WYSIWYG editor
   isPinned: z.boolean().default(false),
   isFavorite: z.boolean().default(false),
   categoryId: z.string().uuid().optional().nullable().or(z.literal('')).transform(v => v || null),
   tagIds: z.array(z.string().uuid()).optional().default([]),
-  steps: z.array(procedureStepSchema).optional().default([]),
 });
 
 export const updateProcedureSchema = createProcedureSchema.partial();
@@ -44,7 +35,7 @@ class ProceduresService {
     if (query.search) {
       where.OR = [
         { title: { contains: query.search, mode: 'insensitive' } },
-        { description: { contains: query.search, mode: 'insensitive' } },
+        { content: { contains: query.search, mode: 'insensitive' } },
       ];
     }
 
@@ -62,7 +53,6 @@ class ProceduresService {
         include: {
           category: { select: { id: true, name: true, color: true } },
           tags: { include: { tag: { select: { id: true, name: true, color: true } } } },
-          _count: { select: { steps: true } },
         },
       }),
       prisma.procedure.count({ where }),
@@ -81,7 +71,6 @@ class ProceduresService {
       include: {
         category: true,
         tags: { include: { tag: true } },
-        steps: { orderBy: { stepNumber: 'asc' } },
         linkedScripts: { include: { script: { select: { id: true, title: true } } } },
         linkedRegistries: { include: { registryEntry: { select: { id: true, name: true } } } },
         linkedNotes: { include: { note: { select: { id: true, title: true } } } },
@@ -100,19 +89,17 @@ class ProceduresService {
   }
 
   async create(userId: string, data: CreateProcedureInput) {
-    const { tagIds, steps, ...procedureData } = data;
+    const { tagIds, ...procedureData } = data;
 
     const procedure = await prisma.procedure.create({
       data: {
         ...procedureData,
         userId,
         tags: tagIds?.length ? { create: tagIds.map((tagId) => ({ tagId })) } : undefined,
-        steps: steps?.length ? { create: steps } : undefined,
       },
       include: {
         category: true,
         tags: { include: { tag: true } },
-        steps: { orderBy: { stepNumber: 'asc' } },
       },
     });
 
@@ -121,7 +108,7 @@ class ProceduresService {
 
   async update(id: string, userId: string, data: UpdateProcedureInput) {
     await this.findById(id, userId);
-    const { tagIds, steps, ...procedureData } = data;
+    const { tagIds, ...procedureData } = data;
 
     const procedure = await prisma.$transaction(async (tx) => {
       if (tagIds !== undefined) {
@@ -133,22 +120,12 @@ class ProceduresService {
         }
       }
 
-      if (steps !== undefined) {
-        await tx.procedureStep.deleteMany({ where: { procedureId: id } });
-        if (steps.length > 0) {
-          await tx.procedureStep.createMany({
-            data: steps.map((step) => ({ ...step, procedureId: id })),
-          });
-        }
-      }
-
       return tx.procedure.update({
         where: { id },
         data: procedureData,
         include: {
           category: true,
           tags: { include: { tag: true } },
-          steps: { orderBy: { stepNumber: 'asc' } },
         },
       });
     });
@@ -177,14 +154,14 @@ class ProceduresService {
         userId,
         OR: [
           { title: { contains: query, mode: 'insensitive' } },
-          { description: { contains: query, mode: 'insensitive' } },
+          { content: { contains: query, mode: 'insensitive' } },
         ],
       },
       take: limit,
       select: {
         id: true,
         title: true,
-        description: true,
+        content: true,
         createdAt: true,
         updatedAt: true,
         category: { select: { name: true } },
@@ -196,7 +173,7 @@ class ProceduresService {
       id: proc.id,
       type: 'procedure' as const,
       title: proc.title,
-      description: proc.description,
+      description: proc.content.substring(0, 200), // Truncate for preview
       tags: proc.tags.map((t) => t.tag.name),
       categories: proc.category ? [proc.category.name] : [],
       createdAt: proc.createdAt,

@@ -59,8 +59,8 @@ export function RegistryForm({ entry, onSubmit, onCancel, isLoading }: RegistryF
   async function fetchCategoriesAndTags() {
     try {
       const [cats, tgs] = await Promise.all([
-        apiGet<Category[]>('/categories'),
-        apiGet<Tag[]>('/tags'),
+        apiGet<Category[]>('/categories?section=REGISTRIES'),
+        apiGet<Tag[]>('/tags?section=REGISTRIES'),
       ]);
       setCategories(cats);
       setTags(tgs);

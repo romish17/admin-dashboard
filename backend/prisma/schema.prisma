@@ -63,6 +63,17 @@ enum Role {
   READONLY
 }
 
+// Section enum for scoping categories and tags
+enum Section {
+  SCRIPTS
+  REGISTRIES
+  ZABBIX
+  NOTES
+  PROCEDURES
+  TODOS
+  RSS
+}
+
 // ============================================
 // SHARED MODELS (Categories & Tags)
 // ============================================
@@ -74,6 +85,7 @@ model Category {
   description String?
   color       String   @default("#3B82F6")
   icon        String?
+  section     Section? // null = all sections, otherwise scoped to specific section
   userId      String   @map("user_id")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
@@ -89,7 +101,7 @@ model Category {
   todos           Todo[]
   rssFeeds        RssFeed[]
 
-  @@unique([userId, slug])
+  @@unique([userId, slug, section])
   @@map("categories")
 }
 
@@ -98,6 +110,7 @@ model Tag {
   name      String
   slug      String
   color     String   @default("#6B7280")
+  section   Section? // null = all sections, otherwise scoped to specific section
   userId    String   @map("user_id")
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -111,7 +124,7 @@ model Tag {
   procedures      ProcedureTag[]
   todos           TodoTag[]
 
-  @@unique([userId, slug])
+  @@unique([userId, slug, section])
   @@map("tags")
 }
 
@@ -383,8 +396,7 @@ model NoteProcedure {
 model Procedure {
   id          String   @id @default(uuid())
   title       String
-  description String?
-  version     String   @default("1.0")
+  content     String   @db.Text // Rich HTML content from WYSIWYG editor
   isPinned    Boolean  @default(false) @map("is_pinned")
   isFavorite  Boolean  @default(false) @map("is_favorite")
   userId      String   @map("user_id")
@@ -398,7 +410,6 @@ model Procedure {
   user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   category Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   tags     ProcedureTag[]
-  steps    ProcedureStep[]
 
   // Linked items
   linkedScripts    ScriptProcedure[]
@@ -408,20 +419,6 @@ model Procedure {
   @@index([userId])
   @@index([categoryId])
   @@map("procedures")
-}
-
-model ProcedureStep {
-  id          String  @id @default(uuid())
-  stepNumber  Int     @map("step_number")
-  title       String
-  content     String  @db.Text
-  isOptional  Boolean @default(false) @map("is_optional")
-  procedureId String  @map("procedure_id")
-
-  procedure Procedure @relation(fields: [procedureId], references: [id], onDelete: Cascade)
-
-  @@unique([procedureId, stepNumber])
-  @@map("procedure_steps")
 }
 
 model ProcedureTag {

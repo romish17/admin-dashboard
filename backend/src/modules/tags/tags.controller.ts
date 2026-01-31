@@ -11,7 +11,8 @@ router.use(authenticate);
 router.get('/', authorize('tags', 'read'),
   async (req: AuthenticatedRequest, res: Response, next) => {
     try {
-      const tags = await tagsService.findAll(req.user!.userId);
+      const section = req.query.section as string | undefined;
+      const tags = await tagsService.findAll(req.user!.userId, section);
       res.json({ success: true, data: tags });
     } catch (error) { next(error); }
   }

@@ -40,6 +40,9 @@ export interface ApiResponse<T = unknown> {
   };
 }
 
+// Section enum for scoping categories and tags
+export type Section = 'SCRIPTS' | 'REGISTRIES' | 'ZABBIX' | 'NOTES' | 'PROCEDURES' | 'TODOS' | 'RSS';
+
 // Category & Tag
 export interface Category {
   id: string;
@@ -48,6 +51,7 @@ export interface Category {
   description?: string;
   color: string;
   icon?: string;
+  section?: Section | null;
   totalItems?: number;
 }
 
@@ -56,6 +60,7 @@ export interface Tag {
   name: string;
   slug: string;
   color: string;
+  section?: Section | null;
   usageCount?: number;
 }
 
@@ -106,25 +111,15 @@ export interface Note {
   updatedAt: string;
 }
 
-// Procedure
-export interface ProcedureStep {
-  id: string;
-  stepNumber: number;
-  title: string;
-  content: string;
-  isOptional: boolean;
-}
-
+// Procedure (Note-like with WYSIWYG content)
 export interface Procedure {
   id: string;
   title: string;
-  description?: string;
-  version: string;
+  content: string; // Rich HTML content from WYSIWYG editor
   isPinned: boolean;
   isFavorite: boolean;
   category?: Category;
   tags: Tag[];
-  steps: ProcedureStep[];
   createdAt: string;
   updatedAt: string;
 }

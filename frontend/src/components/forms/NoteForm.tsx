@@ -45,8 +45,8 @@ export function NoteForm({ note, onSubmit, onCancel, isLoading }: NoteFormProps)
   async function fetchOptions() {
     try {
       const [cats, tgs] = await Promise.all([
-        apiGet<Category[]>('/categories'),
-        apiGet<Tag[]>('/tags'),
+        apiGet<Category[]>('/categories?section=NOTES'),
+        apiGet<Tag[]>('/tags?section=NOTES'),
       ]);
       setCategories(cats);
       setTags(tgs);
