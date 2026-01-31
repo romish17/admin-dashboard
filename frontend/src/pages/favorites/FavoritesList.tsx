@@ -1,16 +1,9 @@
 import { useEffect, useState } from 'react';
 import { apiGet, apiPost, apiPut, apiDelete, getErrorMessage } from '@/services/api';
 import { Favorite } from '@/types';
-import { Plus, Trash2, ExternalLink, Star, Pencil } from 'lucide-react';
-import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { PlusIcon, TrashIcon, ArrowTopRightOnSquareIcon, StarIcon, PencilIcon } from '@heroicons/react/24/outline';
+import toast from 'react-hot-toast';
+import { Modal } from '@/components/ui/Modal';
 import { FavoriteForm } from '@/components/forms/FavoriteForm';
 
 function FavoriteIcon({ icon }: { icon?: string | null }) {
@@ -104,103 +97,95 @@ export function FavoritesList() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Favorites</h1>
-          <p className="text-muted-foreground">Quick access to your most used items</p>
+          <h1 className="text-2xl font-bold text-dark-100">Favorites</h1>
+          <p className="text-dark-400">Quick access to your most used items</p>
         </div>
-        <Button onClick={() => openModal()}>
-          <Plus className="w-5 h-5 mr-2" />
+        <button onClick={() => openModal()} className="btn-primary">
+          <PlusIcon className="w-5 h-5 mr-2" />
           Add Favorite
-        </Button>
+        </button>
       </div>
 
       {isLoading ? (
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full" />
+          <div className="animate-spin w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full" />
         </div>
       ) : favorites.length === 0 ? (
-        <Card className="text-center py-12">
-          <CardContent>
-            <Star className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">No favorites yet. Add your first favorite!</p>
-            <Button onClick={() => openModal()} className="mt-4">
-              <Plus className="w-5 h-5 mr-2" />
-              Add Favorite
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="card text-center py-12">
+          <StarIcon className="w-12 h-12 text-dark-600 mx-auto mb-4" />
+          <p className="text-dark-400">No favorites yet. Add your first favorite!</p>
+          <button onClick={() => openModal()} className="btn-primary mt-4">
+            <PlusIcon className="w-5 h-5 mr-2" />
+            Add Favorite
+          </button>
+        </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {favorites.map((fav) => (
-            <Card key={fav.id} className="group hover:border-primary/50 transition-colors">
-              <CardContent className="pt-6">
-                <div className="flex items-start gap-3">
-                  <FavoriteIcon icon={fav.icon} />
-                  <div className="flex-1 min-w-0">
-                    {fav.url ? (
-                      <a
-                        href={fav.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-foreground font-medium hover:text-primary flex items-center gap-2"
-                      >
-                        {fav.title}
-                        <ExternalLink className="w-4 h-4" />
-                      </a>
-                    ) : fav.targetType && fav.targetId ? (
-                      <a
-                        href={`/${fav.targetType.toLowerCase()}s/${fav.targetId}`}
-                        className="text-foreground font-medium hover:text-primary"
-                      >
-                        {fav.title}
-                      </a>
-                    ) : (
-                      <span className="text-foreground font-medium">{fav.title}</span>
-                    )}
-                    {fav.description && (
-                      <p className="text-muted-foreground text-sm mt-1 line-clamp-2">{fav.description}</p>
-                    )}
-                    {fav.targetType && (
-                      <span className="text-xs text-muted-foreground mt-2 inline-block">{fav.targetType}</span>
-                    )}
-                  </div>
-                  <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => openModal(fav)}
+            <div key={fav.id} className="card-hover group">
+              <div className="flex items-start gap-3">
+                <FavoriteIcon icon={fav.icon} />
+                <div className="flex-1 min-w-0">
+                  {fav.url ? (
+                    <a
+                      href={fav.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-dark-100 font-medium hover:text-primary-400 flex items-center gap-2"
                     >
-                      <Pencil className="w-4 h-4 text-muted-foreground hover:text-primary" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => deleteFavorite(fav.id)}
+                      {fav.title}
+                      <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                    </a>
+                  ) : fav.targetType && fav.targetId ? (
+                    <a
+                      href={`/${fav.targetType.toLowerCase()}s/${fav.targetId}`}
+                      className="text-dark-100 font-medium hover:text-primary-400"
                     >
-                      <Trash2 className="w-4 h-4 text-muted-foreground hover:text-destructive" />
-                    </Button>
-                  </div>
+                      {fav.title}
+                    </a>
+                  ) : (
+                    <span className="text-dark-100 font-medium">{fav.title}</span>
+                  )}
+                  {fav.description && (
+                    <p className="text-dark-400 text-sm mt-1 line-clamp-2">{fav.description}</p>
+                  )}
+                  {fav.targetType && (
+                    <span className="text-xs text-dark-500 mt-2 inline-block">{fav.targetType}</span>
+                  )}
                 </div>
-              </CardContent>
-            </Card>
+                <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => openModal(fav)}
+                    className="p-1 hover:bg-dark-700 rounded"
+                  >
+                    <PencilIcon className="w-4 h-4 text-dark-500 hover:text-primary-400" />
+                  </button>
+                  <button
+                    onClick={() => deleteFavorite(fav.id)}
+                    className="p-1 hover:bg-dark-700 rounded"
+                  >
+                    <TrashIcon className="w-4 h-4 text-dark-500 hover:text-red-400" />
+                  </button>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       )}
 
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{editingFavorite ? 'Edit Favorite' : 'Add Favorite'}</DialogTitle>
-          </DialogHeader>
-          <FavoriteForm
-            favorite={editingFavorite || undefined}
-            onSubmit={handleSubmit}
-            onCancel={closeModal}
-            isLoading={isSaving}
-          />
-        </DialogContent>
-      </Dialog>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        title={editingFavorite ? 'Edit Favorite' : 'Add Favorite'}
+        size="sm"
+      >
+        <FavoriteForm
+          favorite={editingFavorite || undefined}
+          onSubmit={handleSubmit}
+          onCancel={closeModal}
+          isLoading={isSaving}
+        />
+      </Modal>
     </div>
   );
 }

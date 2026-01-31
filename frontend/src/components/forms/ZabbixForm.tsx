@@ -2,12 +2,7 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { apiGet, getErrorMessage } from '@/services/api';
 import { ZabbixItem, Category, Tag } from '@/types';
-import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
+import toast from 'react-hot-toast';
 
 interface ZabbixFormData {
   name: string;
@@ -92,37 +87,40 @@ export function ZabbixForm({ item, onSubmit, onCancel, isLoading }: ZabbixFormPr
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
-      <div className="space-y-2">
-        <Label>Name *</Label>
-        <Input
+      <div>
+        <label className="label">Name *</label>
+        <input
+          type="text"
           {...register('name', { required: 'Name is required' })}
+          className="input"
           placeholder="Item name"
         />
-        {errors.name && <p className="text-destructive text-sm">{errors.name.message}</p>}
+        {errors.name && <p className="text-red-400 text-sm mt-1">{errors.name.message}</p>}
       </div>
 
-      <div className="space-y-2">
-        <Label>Description</Label>
-        <Textarea
+      <div>
+        <label className="label">Description</label>
+        <textarea
           {...register('description')}
+          className="input"
           rows={2}
           placeholder="Optional description"
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Item Type *</Label>
-          <select {...register('itemType')} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+        <div>
+          <label className="label">Item Type *</label>
+          <select {...register('itemType')} className="input">
             {ITEM_TYPES.map(type => (
               <option key={type.value} value={type.value}>{type.label}</option>
             ))}
           </select>
         </div>
 
-        <div className="space-y-2">
-          <Label>Category</Label>
-          <select {...register('categoryId')} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+        <div>
+          <label className="label">Category</label>
+          <select {...register('categoryId')} className="input">
             <option value="">No category</option>
             {categories.map(cat => (
               <option key={cat.id} value={cat.id}>{cat.name}</option>
@@ -132,44 +130,53 @@ export function ZabbixForm({ item, onSubmit, onCancel, isLoading }: ZabbixFormPr
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Version</Label>
-          <Input {...register('version')} placeholder="e.g., 6.4" />
+        <div>
+          <label className="label">Version</label>
+          <input
+            type="text"
+            {...register('version')}
+            className="input"
+            placeholder="e.g., 6.4"
+          />
         </div>
 
-        <div className="space-y-2">
-          <Label>Zabbix ID</Label>
-          <Input {...register('zabbixId')} placeholder="External Zabbix ID" />
+        <div>
+          <label className="label">Zabbix ID</label>
+          <input
+            type="text"
+            {...register('zabbixId')}
+            className="input"
+            placeholder="External Zabbix ID"
+          />
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label>Content (JSON) *</Label>
-        <Textarea
+      <div>
+        <label className="label">Content (JSON) *</label>
+        <textarea
           {...register('content', { required: 'Content is required' })}
-          className="font-mono text-sm"
+          className="input font-mono text-sm"
           rows={10}
           placeholder='{"key": "value"}'
         />
-        {errors.content && <p className="text-destructive text-sm">{errors.content.message}</p>}
-        <p className="text-muted-foreground text-xs">Enter valid JSON configuration</p>
+        {errors.content && <p className="text-red-400 text-sm mt-1">{errors.content.message}</p>}
+        <p className="text-dark-500 text-xs mt-1">Enter valid JSON configuration</p>
       </div>
 
       {tags.length > 0 && (
-        <div className="space-y-2">
-          <Label>Tags</Label>
+        <div>
+          <label className="label">Tags</label>
           <div className="flex flex-wrap gap-2">
             {tags.map(tag => (
               <button
                 key={tag.id}
                 type="button"
                 onClick={() => toggleTag(tag.id)}
-                className={cn(
-                  'px-3 py-1 rounded-full text-sm transition-colors',
+                className={`px-3 py-1 rounded-full text-sm transition-colors ${
                   selectedTags.includes(tag.id)
-                    ? 'text-white'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                )}
+                    ? 'bg-primary-600 text-white'
+                    : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
+                }`}
                 style={selectedTags.includes(tag.id) ? { backgroundColor: tag.color } : {}}
               >
                 {tag.name}
@@ -180,12 +187,12 @@ export function ZabbixForm({ item, onSubmit, onCancel, isLoading }: ZabbixFormPr
       )}
 
       <div className="flex justify-end gap-3 pt-4">
-        <Button type="button" variant="ghost" onClick={onCancel}>
+        <button type="button" onClick={onCancel} className="btn-ghost">
           Cancel
-        </Button>
-        <Button type="submit" disabled={isLoading}>
+        </button>
+        <button type="submit" disabled={isLoading} className="btn-primary">
           {isLoading ? 'Saving...' : item ? 'Update Item' : 'Create Item'}
-        </Button>
+        </button>
       </div>
     </form>
   );

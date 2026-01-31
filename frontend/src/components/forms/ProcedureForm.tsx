@@ -2,13 +2,8 @@ import { useEffect, useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { apiGet, getErrorMessage } from '@/services/api';
 import { Procedure, Category, Tag } from '@/types';
-import { Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
-import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
+import { PlusIcon, TrashIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import toast from 'react-hot-toast';
 
 interface ProcedureFormData {
   title: string;
@@ -103,33 +98,41 @@ export function ProcedureForm({ procedure, onSubmit, onCancel, isLoading }: Proc
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
-      <div className="space-y-2">
-        <Label>Title *</Label>
-        <Input
+      <div>
+        <label className="label">Title *</label>
+        <input
+          type="text"
           {...register('title', { required: 'Title is required' })}
+          className="input"
           placeholder="Procedure title"
         />
-        {errors.title && <p className="text-destructive text-sm">{errors.title.message}</p>}
+        {errors.title && <p className="text-red-400 text-sm mt-1">{errors.title.message}</p>}
       </div>
 
-      <div className="space-y-2">
-        <Label>Description</Label>
-        <Textarea
+      <div>
+        <label className="label">Description</label>
+        <textarea
           {...register('description')}
+          className="input"
           rows={2}
           placeholder="Brief description of this procedure"
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Version</Label>
-          <Input {...register('version')} placeholder="1.0.0" />
+        <div>
+          <label className="label">Version</label>
+          <input
+            type="text"
+            {...register('version')}
+            className="input"
+            placeholder="1.0.0"
+          />
         </div>
 
-        <div className="space-y-2">
-          <Label>Category</Label>
-          <select {...register('categoryId')} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+        <div>
+          <label className="label">Category</label>
+          <select {...register('categoryId')} className="input">
             <option value="">No category</option>
             {categories.map(cat => (
               <option key={cat.id} value={cat.id}>{cat.name}</option>
@@ -143,26 +146,25 @@ export function ProcedureForm({ procedure, onSubmit, onCancel, isLoading }: Proc
           type="checkbox"
           id="isPinned"
           {...register('isPinned')}
-          className="rounded border-border"
+          className="rounded border-dark-500"
         />
-        <Label htmlFor="isPinned" className="font-normal">Pin to top</Label>
+        <label htmlFor="isPinned" className="text-dark-300">Pin to top</label>
       </div>
 
       {tags.length > 0 && (
-        <div className="space-y-2">
-          <Label>Tags</Label>
+        <div>
+          <label className="label">Tags</label>
           <div className="flex flex-wrap gap-2">
             {tags.map(tag => (
               <button
                 key={tag.id}
                 type="button"
                 onClick={() => toggleTag(tag.id)}
-                className={cn(
-                  'px-3 py-1 rounded-full text-sm transition-colors',
+                className={`px-3 py-1 rounded-full text-sm transition-colors ${
                   selectedTags.includes(tag.id)
-                    ? 'text-white'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                )}
+                    ? 'bg-primary-600 text-white'
+                    : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
+                }`}
                 style={selectedTags.includes(tag.id) ? { backgroundColor: tag.color } : {}}
               >
                 {tag.name}
@@ -172,62 +174,63 @@ export function ProcedureForm({ procedure, onSubmit, onCancel, isLoading }: Proc
         </div>
       )}
 
-      <div className="border-t border-border pt-4">
+      <div className="border-t border-dark-700 pt-4">
         <div className="flex items-center justify-between mb-3">
-          <Label className="mb-0">Steps</Label>
-          <Button type="button" variant="ghost" size="sm" onClick={addStep}>
-            <Plus className="w-4 h-4 mr-1" />
+          <label className="label mb-0">Steps</label>
+          <button
+            type="button"
+            onClick={addStep}
+            className="btn-ghost text-sm"
+          >
+            <PlusIcon className="w-4 h-4 mr-1" />
             Add Step
-          </Button>
+          </button>
         </div>
 
         <div className="space-y-4">
           {fields.map((field, index) => (
-            <div key={field.id} className="bg-muted/50 rounded-lg p-4">
+            <div key={field.id} className="bg-dark-700/50 rounded-lg p-4">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-muted-foreground font-medium">Step {index + 1}</span>
+                <span className="text-dark-300 font-medium">Step {index + 1}</span>
                 <div className="flex items-center gap-1">
-                  <Button
+                  <button
                     type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
                     onClick={() => moveStep(index, 'up')}
                     disabled={index === 0}
+                    className="p-1 hover:bg-dark-600 rounded disabled:opacity-50"
                   >
-                    <ChevronUp className="w-4 h-4" />
-                  </Button>
-                  <Button
+                    <ChevronUpIcon className="w-4 h-4 text-dark-400" />
+                  </button>
+                  <button
                     type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
                     onClick={() => moveStep(index, 'down')}
                     disabled={index === fields.length - 1}
+                    className="p-1 hover:bg-dark-600 rounded disabled:opacity-50"
                   >
-                    <ChevronDown className="w-4 h-4" />
-                  </Button>
+                    <ChevronDownIcon className="w-4 h-4 text-dark-400" />
+                  </button>
                   {fields.length > 1 && (
-                    <Button
+                    <button
                       type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-destructive"
                       onClick={() => remove(index)}
+                      className="p-1 hover:bg-red-600/20 rounded text-red-400"
                     >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                      <TrashIcon className="w-4 h-4" />
+                    </button>
                   )}
                 </div>
               </div>
 
               <div className="space-y-3">
-                <Input
+                <input
+                  type="text"
                   {...register(`steps.${index}.title`, { required: 'Step title is required' })}
+                  className="input"
                   placeholder="Step title"
                 />
-                <Textarea
+                <textarea
                   {...register(`steps.${index}.content`, { required: 'Step content is required' })}
+                  className="input"
                   rows={3}
                   placeholder="Step instructions (Markdown supported)"
                 />
@@ -236,11 +239,11 @@ export function ProcedureForm({ procedure, onSubmit, onCancel, isLoading }: Proc
                     type="checkbox"
                     id={`step-${index}-optional`}
                     {...register(`steps.${index}.isOptional`)}
-                    className="rounded border-border"
+                    className="rounded border-dark-500"
                   />
-                  <Label htmlFor={`step-${index}-optional`} className="font-normal text-muted-foreground text-sm">
+                  <label htmlFor={`step-${index}-optional`} className="text-dark-400 text-sm">
                     Optional step
-                  </Label>
+                  </label>
                 </div>
               </div>
             </div>
@@ -249,12 +252,12 @@ export function ProcedureForm({ procedure, onSubmit, onCancel, isLoading }: Proc
       </div>
 
       <div className="flex justify-end gap-3 pt-4">
-        <Button type="button" variant="ghost" onClick={onCancel}>
+        <button type="button" onClick={onCancel} className="btn-ghost">
           Cancel
-        </Button>
-        <Button type="submit" disabled={isLoading}>
+        </button>
+        <button type="submit" disabled={isLoading} className="btn-primary">
           {isLoading ? 'Saving...' : procedure ? 'Update Procedure' : 'Create Procedure'}
-        </Button>
+        </button>
       </div>
     </form>
   );

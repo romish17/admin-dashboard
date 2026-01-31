@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { apiGet, apiPost, apiPut, getErrorMessage } from '@/services/api';
 import { Script } from '@/types';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { ScriptForm } from '@/components/forms/ScriptForm';
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 
 export function ScriptEdit() {
   const { id } = useParams<{ id: string }>();
@@ -72,13 +72,13 @@ export function ScriptEdit() {
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Link to="/scripts" className="btn-ghost p-2">
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeftIcon className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-foreground">
+          <h1 className="text-2xl font-bold text-dark-100">
             {isNew ? 'New Script' : 'Edit Script'}
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-dark-400">
             {isNew ? 'Create a new script' : `Editing: ${script?.title}`}
           </p>
         </div>
