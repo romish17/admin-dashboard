@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
 import { apiGet, apiPost, apiPut, getErrorMessage } from '@/services/api';
 import { Note, PaginatedResponse } from '@/types';
-import { PlusIcon, MagnifyingGlassIcon, StarIcon, PencilIcon } from '@heroicons/react/24/outline';
-import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
+import { Plus, Search, Star, Pencil } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { Modal } from '@/components/ui/Modal';
 import { NoteForm } from '@/components/forms/NoteForm';
@@ -84,18 +83,18 @@ export function NotesList() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-dark-100">Notes</h1>
-          <p className="text-dark-400">Quick notes and documentation</p>
+          <h1 className="text-2xl font-bold text-foreground">Notes</h1>
+          <p className="text-muted-foreground">Quick notes and documentation</p>
         </div>
         <button onClick={() => openModal()} className="btn-primary">
-          <PlusIcon className="w-5 h-5 mr-2" />
+          <Plus className="w-5 h-5 mr-2" />
           New Note
         </button>
       </div>
 
       <div className="card">
         <div className="relative">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search notes..."
@@ -112,44 +111,44 @@ export function NotesList() {
         </div>
       ) : notes.length === 0 ? (
         <div className="card text-center py-12">
-          <p className="text-dark-400">No notes found. Create your first note!</p>
+          <p className="text-muted-foreground">No notes found. Create your first note!</p>
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {notes.map((note) => (
             <div key={note.id} className="card-hover group cursor-pointer" onClick={() => openModal(note)}>
               <div className="flex items-start justify-between gap-2 mb-2">
-                <h3 className="text-lg font-medium text-dark-100 group-hover:text-primary-400 truncate">
+                <h3 className="text-lg font-medium text-foreground group-hover:text-primary truncate">
                   {note.title}
                 </h3>
                 <div className="flex items-center gap-1">
-                  {note.isPinned && <span className="text-primary-400">📌</span>}
+                  {note.isPinned && <span className="text-primary">📌</span>}
                   <button
                     onClick={(e) => { e.stopPropagation(); toggleFavorite(note.id); }}
-                    className="p-1 hover:bg-dark-700 rounded"
+                    className="p-1 hover:bg-muted rounded"
                   >
                     {note.isFavorite ? (
-                      <StarSolidIcon className="w-4 h-4 text-yellow-400" />
+                      <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                     ) : (
-                      <StarIcon className="w-4 h-4 text-dark-500" />
+                      <Star className="w-4 h-4 text-muted-foreground" />
                     )}
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); openModal(note); }}
-                    className="p-1 hover:bg-dark-700 rounded"
+                    className="p-1 hover:bg-muted rounded"
                   >
-                    <PencilIcon className="w-4 h-4 text-dark-400" />
+                    <Pencil className="w-4 h-4 text-muted-foreground" />
                   </button>
                 </div>
               </div>
-              <div className="text-dark-400 text-sm line-clamp-3 prose-dark">
+              <div className="text-muted-foreground text-sm line-clamp-3 prose-dark">
                 {note.isMarkdown ? (
                   <ReactMarkdown>{note.content.substring(0, 200)}</ReactMarkdown>
                 ) : (
                   note.content.substring(0, 200)
                 )}
               </div>
-              <div className="flex items-center gap-2 mt-3 text-xs text-dark-500">
+              <div className="flex items-center gap-2 mt-3 text-xs text-muted-foreground">
                 {note.category && <span style={{ color: note.category.color }}>{note.category.name}</span>}
                 <span>{formatDistanceToNow(new Date(note.updatedAt), { addSuffix: true })}</span>
               </div>

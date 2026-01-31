@@ -3,14 +3,13 @@ import { Link } from 'react-router-dom';
 import { apiGet, apiPost, getErrorMessage } from '@/services/api';
 import { Script, PaginatedResponse, Category, Tag } from '@/types';
 import {
-  PlusIcon,
-  MagnifyingGlassIcon,
-  StarIcon,
-  FunnelIcon,
-} from '@heroicons/react/24/outline';
-import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
-import clsx from 'clsx';
-import toast from 'react-hot-toast';
+  Plus,
+  Search,
+  Star,
+  Filter,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 
 const languageColors: Record<string, string> = {
@@ -83,11 +82,11 @@ export function ScriptsList() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-dark-100">Scripts</h1>
-          <p className="text-dark-400">Manage your PowerShell, Bash, and other scripts</p>
+          <h1 className="text-2xl font-bold text-foreground">Scripts</h1>
+          <p className="text-muted-foreground">Manage your PowerShell, Bash, and other scripts</p>
         </div>
         <Link to="/scripts/new" className="btn-primary">
-          <PlusIcon className="w-5 h-5 mr-2" />
+          <Plus className="w-5 h-5 mr-2" />
           New Script
         </Link>
       </div>
@@ -96,7 +95,7 @@ export function ScriptsList() {
       <div className="card">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search scripts..."
@@ -107,15 +106,15 @@ export function ScriptsList() {
           </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={clsx('btn-secondary', showFilters && 'bg-dark-600')}
+            className={cn('btn-secondary', showFilters && 'bg-dark-600')}
           >
-            <FunnelIcon className="w-5 h-5 mr-2" />
+            <Filter className="w-5 h-5 mr-2" />
             Filters
           </button>
         </div>
 
         {showFilters && (
-          <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-dark-700">
+          <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-border">
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
@@ -151,7 +150,7 @@ export function ScriptsList() {
         </div>
       ) : scripts.length === 0 ? (
         <div className="card text-center py-12">
-          <p className="text-dark-400">No scripts found. Create your first script!</p>
+          <p className="text-muted-foreground">No scripts found. Create your first script!</p>
         </div>
       ) : (
         <div className="grid gap-4">
@@ -164,15 +163,15 @@ export function ScriptsList() {
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3">
-                    <h3 className="text-lg font-medium text-dark-100 group-hover:text-primary-400 truncate">
+                    <h3 className="text-lg font-medium text-foreground group-hover:text-primary truncate">
                       {script.title}
                     </h3>
-                    <span className={clsx('badge', languageColors[script.language])}>
+                    <span className={cn('badge', languageColors[script.language])}>
                       {script.language}
                     </span>
                   </div>
                   {script.description && (
-                    <p className="text-dark-400 text-sm mt-1 line-clamp-2">{script.description}</p>
+                    <p className="text-muted-foreground text-sm mt-1 line-clamp-2">{script.description}</p>
                   )}
                   <div className="flex items-center gap-4 mt-3">
                     {script.category && (
@@ -184,9 +183,9 @@ export function ScriptsList() {
                       </span>
                     )}
                     {script.tags.slice(0, 3).map((tag) => (
-                      <span key={tag.id} className="text-xs text-dark-500">#{tag.name}</span>
+                      <span key={tag.id} className="text-xs text-muted-foreground">#{tag.name}</span>
                     ))}
-                    <span className="text-xs text-dark-500">
+                    <span className="text-xs text-muted-foreground">
                       Updated {formatDistanceToNow(new Date(script.updatedAt), { addSuffix: true })}
                     </span>
                   </div>
@@ -196,12 +195,12 @@ export function ScriptsList() {
                     e.preventDefault();
                     toggleFavorite(script.id);
                   }}
-                  className="p-2 hover:bg-dark-700 rounded-lg"
+                  className="p-2 hover:bg-muted rounded-lg"
                 >
                   {script.isFavorite ? (
-                    <StarSolidIcon className="w-5 h-5 text-yellow-400" />
+                    <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
                   ) : (
-                    <StarIcon className="w-5 h-5 text-dark-500 hover:text-yellow-400" />
+                    <Star className="w-5 h-5 text-muted-foreground hover:text-yellow-400" />
                   )}
                 </button>
               </div>
@@ -212,7 +211,7 @@ export function ScriptsList() {
 
       {/* Pagination info */}
       {meta.total > 0 && (
-        <div className="text-center text-sm text-dark-400">
+        <div className="text-center text-sm text-muted-foreground">
           Showing {scripts.length} of {meta.total} scripts
         </div>
       )}

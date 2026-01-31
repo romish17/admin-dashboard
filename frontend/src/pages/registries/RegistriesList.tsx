@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { apiGet, apiPost, apiPut, getErrorMessage } from '@/services/api';
 import { RegistryEntry, PaginatedResponse } from '@/types';
-import { PlusIcon, MagnifyingGlassIcon, ArrowDownTrayIcon, PencilIcon } from '@heroicons/react/24/outline';
-import toast from 'react-hot-toast';
+import { Plus, Search, Download, Pencil } from 'lucide-react';
+import { toast } from 'sonner';
 import { Modal } from '@/components/ui/Modal';
 import { RegistryForm } from '@/components/forms/RegistryForm';
 
@@ -99,18 +99,18 @@ export function RegistriesList() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-dark-100">Windows Registry</h1>
-          <p className="text-dark-400">Manage registry entries and export as .reg files</p>
+          <h1 className="text-2xl font-bold text-foreground">Windows Registry</h1>
+          <p className="text-muted-foreground">Manage registry entries and export as .reg files</p>
         </div>
         <div className="flex gap-2">
           {selected.size > 0 && (
             <button onClick={exportSelected} className="btn-secondary">
-              <ArrowDownTrayIcon className="w-5 h-5 mr-2" />
+              <Download className="w-5 h-5 mr-2" />
               Export ({selected.size})
             </button>
           )}
           <button onClick={() => openModal()} className="btn-primary">
-            <PlusIcon className="w-5 h-5 mr-2" />
+            <Plus className="w-5 h-5 mr-2" />
             New Entry
           </button>
         </div>
@@ -118,7 +118,7 @@ export function RegistriesList() {
 
       <div className="card">
         <div className="relative">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search registry entries..."
@@ -135,13 +135,13 @@ export function RegistriesList() {
         </div>
       ) : entries.length === 0 ? (
         <div className="card text-center py-12">
-          <p className="text-dark-400">No registry entries found.</p>
+          <p className="text-muted-foreground">No registry entries found.</p>
         </div>
       ) : (
         <div className="card overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-dark-700">
+              <tr className="border-b border-border">
                 <th className="p-3 text-left">
                   <input
                     type="checkbox"
@@ -153,19 +153,19 @@ export function RegistriesList() {
                         setSelected(new Set());
                       }
                     }}
-                    className="rounded border-dark-500"
+                    className="rounded border-muted-foreground"
                   />
                 </th>
-                <th className="p-3 text-left text-dark-300 font-medium">Name</th>
-                <th className="p-3 text-left text-dark-300 font-medium">Key Path</th>
-                <th className="p-3 text-left text-dark-300 font-medium">Type</th>
-                <th className="p-3 text-left text-dark-300 font-medium">Value</th>
-                <th className="p-3 text-left text-dark-300 font-medium">Actions</th>
+                <th className="p-3 text-left text-muted-foreground font-medium">Name</th>
+                <th className="p-3 text-left text-muted-foreground font-medium">Key Path</th>
+                <th className="p-3 text-left text-muted-foreground font-medium">Type</th>
+                <th className="p-3 text-left text-muted-foreground font-medium">Value</th>
+                <th className="p-3 text-left text-muted-foreground font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
               {entries.map((entry) => (
-                <tr key={entry.id} className="border-b border-dark-700 hover:bg-dark-700/50">
+                <tr key={entry.id} className="border-b border-border hover:bg-muted/50">
                   <td className="p-3">
                     <input
                       type="checkbox"
@@ -179,21 +179,21 @@ export function RegistriesList() {
                         }
                         setSelected(newSelected);
                       }}
-                      className="rounded border-dark-500"
+                      className="rounded border-muted-foreground"
                     />
                   </td>
-                  <td className="p-3 text-dark-100">{entry.name}</td>
-                  <td className="p-3 text-dark-400 font-mono text-sm truncate max-w-xs">{entry.keyPath}</td>
+                  <td className="p-3 text-foreground">{entry.name}</td>
+                  <td className="p-3 text-muted-foreground font-mono text-sm truncate max-w-xs">{entry.keyPath}</td>
                   <td className="p-3">
                     <span className="badge bg-blue-500/20 text-blue-400">{entry.valueType}</span>
                   </td>
-                  <td className="p-3 text-dark-400 font-mono text-sm truncate max-w-xs">{entry.valueData}</td>
+                  <td className="p-3 text-muted-foreground font-mono text-sm truncate max-w-xs">{entry.valueData}</td>
                   <td className="p-3">
                     <button
                       onClick={() => openModal(entry)}
                       className="p-1 hover:bg-dark-600 rounded"
                     >
-                      <PencilIcon className="w-4 h-4 text-dark-400" />
+                      <Pencil className="w-4 h-4 text-muted-foreground" />
                     </button>
                   </td>
                 </tr>

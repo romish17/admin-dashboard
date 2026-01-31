@@ -3,7 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAuthStore } from '@/store/auth';
 import { getErrorMessage } from '@/services/api';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface LoginForm {
   email: string;
@@ -36,15 +39,13 @@ export function Login() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div>
-        <label htmlFor="email" className="label">
-          Email address
-        </label>
-        <input
+      <div className="space-y-2">
+        <Label htmlFor="email">Email address</Label>
+        <Input
           id="email"
           type="email"
           autoComplete="email"
-          className={errors.email ? 'input-error' : 'input'}
+          className={errors.email ? 'border-destructive' : ''}
           {...register('email', {
             required: 'Email is required',
             pattern: {
@@ -54,35 +55,33 @@ export function Login() {
           })}
         />
         {errors.email && (
-          <p className="mt-1 text-sm text-red-400">{errors.email.message}</p>
+          <p className="text-sm text-destructive">{errors.email.message}</p>
         )}
       </div>
 
-      <div>
-        <label htmlFor="password" className="label">
-          Password
-        </label>
-        <input
+      <div className="space-y-2">
+        <Label htmlFor="password">Password</Label>
+        <Input
           id="password"
           type="password"
           autoComplete="current-password"
-          className={errors.password ? 'input-error' : 'input'}
+          className={errors.password ? 'border-destructive' : ''}
           {...register('password', {
             required: 'Password is required',
           })}
         />
         {errors.password && (
-          <p className="mt-1 text-sm text-red-400">{errors.password.message}</p>
+          <p className="text-sm text-destructive">{errors.password.message}</p>
         )}
       </div>
 
-      <button type="submit" className="btn-primary w-full" disabled={isLoading}>
+      <Button type="submit" className="w-full" disabled={isLoading}>
         {isLoading ? 'Signing in...' : 'Sign in'}
-      </button>
+      </Button>
 
-      <p className="text-center text-sm text-dark-400">
+      <p className="text-center text-sm text-muted-foreground">
         Don't have an account?{' '}
-        <Link to="/register" className="text-primary-400 hover:text-primary-300">
+        <Link to="/register" className="text-primary hover:text-primary/80">
           Register
         </Link>
       </p>

@@ -2,17 +2,17 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/auth';
 import { apiGet, apiPatch, apiPost, apiPut, apiDelete, getErrorMessage } from '@/services/api';
 import { Category, Tag } from '@/types';
-import { UserIcon, KeyIcon, TagIcon, FolderIcon, PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
-import clsx from 'clsx';
-import toast from 'react-hot-toast';
+import { User, Key, Tag as TagIcon, Folder, Plus, Pencil, Trash2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 import { Modal } from '@/components/ui/Modal';
 import { CategoryForm } from '@/components/forms/CategoryForm';
 import { TagForm } from '@/components/forms/TagForm';
 
 const tabs = [
-  { id: 'profile', name: 'Profile', icon: UserIcon },
-  { id: 'password', name: 'Password', icon: KeyIcon },
-  { id: 'categories', name: 'Categories', icon: FolderIcon },
+  { id: 'profile', name: 'Profile', icon: User },
+  { id: 'password', name: 'Password', icon: Key },
+  { id: 'categories', name: 'Categories', icon: Folder },
   { id: 'tags', name: 'Tags', icon: TagIcon },
 ];
 
@@ -190,8 +190,8 @@ export function Settings() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-dark-100">Settings</h1>
-        <p className="text-dark-400">Manage your account and preferences</p>
+        <h1 className="text-2xl font-bold text-foreground">Settings</h1>
+        <p className="text-muted-foreground">Manage your account and preferences</p>
       </div>
 
       <div className="flex flex-col md:flex-row gap-6">
@@ -202,11 +202,11 @@ export function Settings() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={clsx(
+                className={cn(
                   'w-full flex items-center gap-3 px-4 py-2 rounded-lg text-left transition-colors',
                   activeTab === tab.id
-                    ? 'bg-primary-600/20 text-primary-400'
-                    : 'text-dark-300 hover:bg-dark-700 hover:text-dark-100'
+                    ? 'bg-primary/20 text-primary'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                 )}
               >
                 <tab.icon className="w-5 h-5" />
@@ -220,15 +220,15 @@ export function Settings() {
         <div className="flex-1">
           {activeTab === 'profile' && (
             <div className="card">
-              <h2 className="text-lg font-semibold text-dark-100 mb-4">Profile Information</h2>
+              <h2 className="text-lg font-semibold text-foreground mb-4">Profile Information</h2>
               <form onSubmit={updateProfile} className="space-y-4">
                 <div>
                   <label className="label">Email</label>
-                  <input type="email" value={user?.email || ''} disabled className="input bg-dark-700" />
+                  <input type="email" value={user?.email || ''} disabled className="input bg-muted" />
                 </div>
                 <div>
                   <label className="label">Username</label>
-                  <input type="text" value={user?.username || ''} disabled className="input bg-dark-700" />
+                  <input type="text" value={user?.username || ''} disabled className="input bg-muted" />
                 </div>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
@@ -259,7 +259,7 @@ export function Settings() {
 
           {activeTab === 'password' && (
             <div className="card">
-              <h2 className="text-lg font-semibold text-dark-100 mb-4">Change Password</h2>
+              <h2 className="text-lg font-semibold text-foreground mb-4">Change Password</h2>
               <form onSubmit={changePassword} className="space-y-4 max-w-md">
                 <div>
                   <label className="label">Current Password</label>
@@ -301,21 +301,21 @@ export function Settings() {
           {activeTab === 'categories' && (
             <div className="card">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-dark-100">Manage Categories</h2>
+                <h2 className="text-lg font-semibold text-foreground">Manage Categories</h2>
                 <button onClick={() => openCategoryModal()} className="btn-primary">
-                  <PlusIcon className="w-5 h-5 mr-2" />
+                  <Plus className="w-5 h-5 mr-2" />
                   New Category
                 </button>
               </div>
 
               {categories.length === 0 ? (
-                <p className="text-dark-400 text-center py-8">No categories yet. Create your first one!</p>
+                <p className="text-muted-foreground text-center py-8">No categories yet. Create your first one!</p>
               ) : (
                 <div className="space-y-2">
                   {categories.map((category) => (
                     <div
                       key={category.id}
-                      className="flex items-center justify-between p-3 bg-dark-700/50 rounded-lg group"
+                      className="flex items-center justify-between p-3 bg-muted/50 rounded-lg group"
                     >
                       <div className="flex items-center gap-3">
                         <div
@@ -323,9 +323,9 @@ export function Settings() {
                           style={{ backgroundColor: category.color }}
                         />
                         <div>
-                          <p className="text-dark-100 font-medium">{category.name}</p>
+                          <p className="text-foreground font-medium">{category.name}</p>
                           {category.description && (
-                            <p className="text-dark-400 text-sm">{category.description}</p>
+                            <p className="text-muted-foreground text-sm">{category.description}</p>
                           )}
                         </div>
                       </div>
@@ -334,13 +334,13 @@ export function Settings() {
                           onClick={() => openCategoryModal(category)}
                           className="p-2 hover:bg-dark-600 rounded"
                         >
-                          <PencilIcon className="w-4 h-4 text-dark-400" />
+                          <Pencil className="w-4 h-4 text-muted-foreground" />
                         </button>
                         <button
                           onClick={() => deleteCategory(category.id)}
                           className="p-2 hover:bg-red-600/20 rounded"
                         >
-                          <TrashIcon className="w-4 h-4 text-red-400" />
+                          <Trash2 className="w-4 h-4 text-destructive" />
                         </button>
                       </div>
                     </div>
@@ -353,15 +353,15 @@ export function Settings() {
           {activeTab === 'tags' && (
             <div className="card">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-dark-100">Manage Tags</h2>
+                <h2 className="text-lg font-semibold text-foreground">Manage Tags</h2>
                 <button onClick={() => openTagModal()} className="btn-primary">
-                  <PlusIcon className="w-5 h-5 mr-2" />
+                  <Plus className="w-5 h-5 mr-2" />
                   New Tag
                 </button>
               </div>
 
               {tags.length === 0 ? (
-                <p className="text-dark-400 text-center py-8">No tags yet. Create your first one!</p>
+                <p className="text-muted-foreground text-center py-8">No tags yet. Create your first one!</p>
               ) : (
                 <div className="flex flex-wrap gap-2">
                   {tags.map((tag) => (
@@ -374,22 +374,22 @@ export function Settings() {
                         className="w-2 h-2 rounded-full"
                         style={{ backgroundColor: tag.color }}
                       />
-                      <span className="text-dark-200">{tag.name}</span>
+                      <span className="text-foreground">{tag.name}</span>
                       {tag.usageCount !== undefined && (
-                        <span className="text-dark-500 text-xs">({tag.usageCount})</span>
+                        <span className="text-muted-foreground text-xs">({tag.usageCount})</span>
                       )}
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => openTagModal(tag)}
                           className="p-1 hover:bg-dark-600 rounded"
                         >
-                          <PencilIcon className="w-3 h-3 text-dark-400" />
+                          <Pencil className="w-3 h-3 text-muted-foreground" />
                         </button>
                         <button
                           onClick={() => deleteTag(tag.id)}
                           className="p-1 hover:bg-red-600/20 rounded"
                         >
-                          <TrashIcon className="w-3 h-3 text-red-400" />
+                          <Trash2 className="w-3 h-3 text-destructive" />
                         </button>
                       </div>
                     </div>

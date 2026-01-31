@@ -1,6 +1,13 @@
-import { Fragment, ReactNode } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { ReactNode } from 'react';
+import { X } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface ModalProps {
   isOpen: boolean;
@@ -19,58 +26,23 @@ const sizeClasses = {
 
 export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalProps) {
   return (
-    <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-[100]" onClose={onClose}>
-        {/* Backdrop */}
-        <Transition.Child
-          as={Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-dark-950/80 backdrop-blur-sm" />
-        </Transition.Child>
-
-        {/* Modal container */}
-        <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4">
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 scale-95 translate-y-4"
-              enterTo="opacity-100 scale-100 translate-y-0"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 scale-100 translate-y-0"
-              leaveTo="opacity-0 scale-95 translate-y-4"
-            >
-              <Dialog.Panel
-                className={`w-full ${sizeClasses[size]} transform overflow-hidden rounded-2xl bg-dark-800 border border-dark-700/50 shadow-2xl shadow-dark-950/50 transition-all`}
-              >
-                {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-dark-700/50 bg-dark-800/50">
-                  <Dialog.Title className="text-lg font-semibold text-dark-50">
-                    {title}
-                  </Dialog.Title>
-                  <button
-                    onClick={onClose}
-                    className="p-2 rounded-xl text-dark-400 hover:text-dark-100 hover:bg-dark-700/50 transition-all duration-200"
-                  >
-                    <XMarkIcon className="w-5 h-5" />
-                  </button>
-                </div>
-
-                {/* Content */}
-                <div className="px-6 py-5 max-h-[calc(100vh-200px)] overflow-y-auto">
-                  {children}
-                </div>
-              </Dialog.Panel>
-            </Transition.Child>
-          </div>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className={cn('p-0', sizeClasses[size])}>
+        <DialogHeader className="flex flex-row items-center justify-between px-6 py-4 border-b border-border">
+          <DialogTitle className="text-lg font-semibold">{title}</DialogTitle>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={onClose}
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        </DialogHeader>
+        <div className="px-6 py-5 max-h-[calc(100vh-200px)] overflow-y-auto">
+          {children}
         </div>
-      </Dialog>
-    </Transition>
+      </DialogContent>
+    </Dialog>
   );
 }
