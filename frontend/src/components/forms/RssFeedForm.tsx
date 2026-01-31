@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { apiGet, getErrorMessage } from '@/services/api';
 import { RssFeed, Category } from '@/types';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 interface RssFeedFormData {
   title: string;
@@ -64,20 +68,18 @@ export function RssFeedForm({ feed, onSubmit, onCancel, isLoading }: RssFeedForm
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div>
-        <label className="label">Feed Title *</label>
-        <input
-          type="text"
+      <div className="space-y-2">
+        <Label>Feed Title *</Label>
+        <Input
           {...register('title', { required: 'Title is required' })}
-          className="input"
           placeholder="Feed name"
         />
-        {errors.title && <p className="text-red-400 text-sm mt-1">{errors.title.message}</p>}
+        {errors.title && <p className="text-destructive text-sm">{errors.title.message}</p>}
       </div>
 
-      <div>
-        <label className="label">Feed URL *</label>
-        <input
+      <div className="space-y-2">
+        <Label>Feed URL *</Label>
+        <Input
           type="url"
           {...register('url', {
             required: 'Feed URL is required',
@@ -86,46 +88,43 @@ export function RssFeedForm({ feed, onSubmit, onCancel, isLoading }: RssFeedForm
               message: 'Please enter a valid URL'
             }
           })}
-          className="input"
           placeholder="https://example.com/feed.xml"
         />
-        {errors.url && <p className="text-red-400 text-sm mt-1">{errors.url.message}</p>}
+        {errors.url && <p className="text-destructive text-sm">{errors.url.message}</p>}
       </div>
 
-      <div>
-        <label className="label">Site URL</label>
-        <input
+      <div className="space-y-2">
+        <Label>Site URL</Label>
+        <Input
           type="url"
           {...register('siteUrl')}
-          className="input"
           placeholder="https://example.com"
         />
-        <p className="text-dark-500 text-xs mt-1">Optional: Link to the main website</p>
+        <p className="text-muted-foreground text-xs">Optional: Link to the main website</p>
       </div>
 
-      <div>
-        <label className="label">Description</label>
-        <textarea
+      <div className="space-y-2">
+        <Label>Description</Label>
+        <Textarea
           {...register('description')}
-          className="input"
           rows={2}
           placeholder="Optional description"
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="label">Refresh Rate</label>
-          <select {...register('refreshRate', { valueAsNumber: true })} className="input">
+        <div className="space-y-2">
+          <Label>Refresh Rate</Label>
+          <select {...register('refreshRate', { valueAsNumber: true })} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
             {REFRESH_RATES.map(rate => (
               <option key={rate.value} value={rate.value}>{rate.label}</option>
             ))}
           </select>
         </div>
 
-        <div>
-          <label className="label">Category</label>
-          <select {...register('categoryId')} className="input">
+        <div className="space-y-2">
+          <Label>Category</Label>
+          <select {...register('categoryId')} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
             <option value="">No category</option>
             {categories.map(cat => (
               <option key={cat.id} value={cat.id}>{cat.name}</option>
@@ -140,9 +139,9 @@ export function RssFeedForm({ feed, onSubmit, onCancel, isLoading }: RssFeedForm
             type="checkbox"
             id="isActive"
             {...register('isActive')}
-            className="rounded border-dark-500"
+            className="rounded border-border"
           />
-          <label htmlFor="isActive" className="text-dark-300">Active</label>
+          <Label htmlFor="isActive" className="font-normal">Active</Label>
         </div>
 
         <div className="flex items-center gap-2">
@@ -150,19 +149,19 @@ export function RssFeedForm({ feed, onSubmit, onCancel, isLoading }: RssFeedForm
             type="checkbox"
             id="showOnHome"
             {...register('showOnHome')}
-            className="rounded border-dark-500"
+            className="rounded border-border"
           />
-          <label htmlFor="showOnHome" className="text-dark-300">Show on Dashboard</label>
+          <Label htmlFor="showOnHome" className="font-normal">Show on Dashboard</Label>
         </div>
       </div>
 
       <div className="flex justify-end gap-3 pt-4">
-        <button type="button" onClick={onCancel} className="btn-ghost">
+        <Button type="button" variant="ghost" onClick={onCancel}>
           Cancel
-        </button>
-        <button type="submit" disabled={isLoading} className="btn-primary">
+        </Button>
+        <Button type="submit" disabled={isLoading}>
           {isLoading ? 'Saving...' : feed ? 'Update Feed' : 'Add Feed'}
-        </button>
+        </Button>
       </div>
     </form>
   );

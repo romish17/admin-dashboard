@@ -1,31 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
+import { Toaster } from '@/components/ui/sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import App from './App';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter>
-      <App />
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          duration: 4000,
-          style: {
-            background: '#1e293b',
-            color: '#f1f5f9',
-            border: '1px solid #334155',
-          },
-          success: {
-            iconTheme: { primary: '#22c55e', secondary: '#f1f5f9' },
-          },
-          error: {
-            iconTheme: { primary: '#ef4444', secondary: '#f1f5f9' },
-          },
-        }}
-      />
+      <TooltipProvider>
+        <App />
+        <Toaster position="top-right" />
+      </TooltipProvider>
     </BrowserRouter>
   </React.StrictMode>
 );
